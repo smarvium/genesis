@@ -8,6 +8,7 @@ interface WizardStore extends WizardState {
   setUserInput: (input: string) => void;
   setBlueprint: (blueprint: Blueprint) => void;
   updateBlueprint: (updatedBlueprint: Partial<Blueprint>) => void;
+  updateBlueprint: (updatedBlueprint: Partial<Blueprint>) => void;
   setCredentials: (credentials: Record<string, string>) => void;
   setSimulationResults: (results: any) => void;
   
@@ -56,6 +57,12 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
   setBlueprint: (blueprint) => {
     console.log('📋 Blueprint set:', blueprint.id);
     set({ blueprint });
+  },
+
+  updateBlueprint: (updatedBlueprint) => {
+    set(state => ({
+      blueprint: state.blueprint ? { ...state.blueprint, ...updatedBlueprint } : undefined
+    }));
   },
 
   setCredentials: (credentials) => {

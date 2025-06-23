@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Handle, Position, NodeProps, Node } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { GitBranch, Target, MoreHorizontal, Check, X } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
@@ -14,7 +14,10 @@ interface ConditionNodeData {
   status: 'ready' | 'evaluating' | 'true' | 'false' | 'error';
 }
 
-export const ConditionNode = memo<NodeProps<ConditionNodeData>>(({ data, selected }) => {
+// Create a type that extends NodeProps but with required width/height
+type ConditionNodeProps = NodeProps<ConditionNodeData>;
+
+export const ConditionNode = memo<ConditionNodeProps>(({ data, selected }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ready': return 'border-orange-400 shadow-orange-400/30';

@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Handle, Position, NodeProps, Node } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Clock, Timer, MoreHorizontal, Pause } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
@@ -14,7 +14,10 @@ interface DelayNodeData {
   status: 'ready' | 'waiting' | 'paused' | 'completed';
 }
 
-export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected }) => {
+// Create a type that extends NodeProps but with required width/height
+type DelayNodeProps = NodeProps<DelayNodeData>;
+
+export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ready': return 'border-violet-400 shadow-violet-400/30';

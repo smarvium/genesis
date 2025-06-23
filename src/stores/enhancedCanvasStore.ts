@@ -14,6 +14,11 @@ interface EnhancedCanvasState {
   // Core Canvas State
   canvasMode: 'design' | 'simulate' | 'deploy' | 'debug';
   setCanvasMode: (mode: 'design' | 'simulate' | 'deploy' | 'debug') => void;
+  // Workflow Nodes and Edges
+  workflowNodes: Node[];
+  workflowEdges: Edge[];
+  setWorkflowNodes: (nodes: Node[]) => void;
+  setWorkflowEdges: (edges: Edge[]) => void;
   
   // Enhanced Selection
   selectedNodes: string[];
@@ -113,6 +118,12 @@ export const useEnhancedCanvasStore = create<EnhancedCanvasState>((set, get) => 
   // Core Canvas State
   canvasMode: 'design',
   setCanvasMode: (mode) => set({ canvasMode: mode }),
+  
+  // Workflow Nodes and Edges
+  workflowNodes: [],
+  workflowEdges: [],
+  setWorkflowNodes: (nodes) => set({ workflowNodes: nodes }),
+  setWorkflowEdges: (edges) => set({ workflowEdges: edges }),
   
   // Enhanced Selection
   selectedNodes: [],

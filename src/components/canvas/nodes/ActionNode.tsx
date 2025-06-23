@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Handle, Position, NodeProps, Node } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Settings, Mail, Database, Globe, MoreHorizontal, CheckCircle, Clock } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
@@ -14,7 +14,10 @@ interface ActionNodeData {
   status: 'pending' | 'executing' | 'completed' | 'error';
 }
 
-export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected }) => {
+// Create a type that extends NodeProps but with required width/height
+type ActionNodeProps = NodeProps<ActionNodeData>;
+
+export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'border-blue-400 shadow-blue-400/30';

@@ -19,6 +19,7 @@ import '@xyflow/react/dist/style.css';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { 
   Bot, 
+  Zap as ZapIcon, 
   Zap, 
   Settings, 
   Play, 
@@ -70,13 +71,14 @@ import { HolographicButton } from '../ui/HolographicButton';
 import { useCanvasStore } from '../../stores/canvasStore';
 import type { Blueprint } from '../../types';
 
+// Define node types with proper typing
 const nodeTypes = {
   agent: AgentNode,
   trigger: TriggerNode,
   action: ActionNode,
   condition: ConditionNode,
   delay: DelayNode,
-};
+} as const;
 
 const proOptions = {
   hideAttribution: true,
@@ -432,10 +434,10 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           id: `trigger-agent-${index + 1}`,
           source: 'trigger-1',
           target: `agent-${index + 1}`,
-          type: 'smoothstep',
+          type: 'smoothstep' as const,
           animated: true,
-          style: { stroke: '#10b981', strokeWidth: 3 },
-          markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981' },
+          style: { stroke: '#10b981', strokeWidth: 3 } as const,
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981' } as const,
         });
       }
 
@@ -445,10 +447,10 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           id: `agent-${index}-agent-${index + 1}`,
           source: `agent-${index}`,
           target: `agent-${index + 1}`,
-          type: 'smoothstep',
+          type: 'smoothstep' as const,
           animated: true,
-          style: { stroke: '#8b5cf6', strokeWidth: 2 },
-          markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' },
+          style: { stroke: '#8b5cf6', strokeWidth: 2 } as const,
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' } as const,
         });
       }
     });
@@ -480,10 +482,10 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           id: `agent-${targetAgentIndex}-workflow-${index + 1}`,
           source: `agent-${targetAgentIndex}`,
           target: `workflow-${index + 1}`,
-          type: 'smoothstep',
+          type: 'smoothstep' as const,
           animated: true,
-          style: { stroke: '#f59e0b', strokeWidth: 2 },
-          markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b' },
+          style: { stroke: '#f59e0b', strokeWidth: 2 } as const,
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b' } as const,
         });
       }
     });
@@ -585,8 +587,8 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
         id: `edge-${params.source}-${params.target}-${Date.now()}`,
         type: 'smoothstep',
         animated: true, 
-        style: { stroke: '#8b5cf6', strokeWidth: 2 },
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' },
+        style: { stroke: '#8b5cf6', strokeWidth: 2 } as const,
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' } as const,
       };
       const newEdges = addEdge(edge, edges);
       setEdges([...newEdges]);

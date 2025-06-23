@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Handle, Position, NodeProps, Node } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Play, Calendar, Globe, Zap, MoreHorizontal } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
@@ -14,7 +14,10 @@ interface TriggerNodeData {
   status: 'ready' | 'active' | 'triggered' | 'error';
 }
 
-export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected }) => {
+// Create a type that extends NodeProps but with required width/height
+type TriggerNodeProps = NodeProps<TriggerNodeData>;
+
+export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ready': return 'border-emerald-400 shadow-emerald-400/30';

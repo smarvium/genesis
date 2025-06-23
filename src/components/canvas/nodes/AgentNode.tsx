@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Handle, Position, NodeProps, Node } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Bot, Settings, Play, Pause, MoreHorizontal, Zap, Brain } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
@@ -15,7 +15,10 @@ interface AgentNodeData {
   status: 'ready' | 'executing' | 'paused' | 'error' | 'completed';
 }
 
-export const AgentNode = memo<NodeProps<AgentNodeData>>(({ data, selected }) => {
+// Create a type that extends NodeProps but with required width/height
+type AgentNodeProps = NodeProps<AgentNodeData>;
+
+export const AgentNode = memo<AgentNodeProps>(({ data, selected }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ready': return 'border-blue-400 shadow-blue-400/30';
