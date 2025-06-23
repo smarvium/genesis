@@ -1,0 +1,34 @@
+# Node.js / Frontend build artifacts and dependencies
+node_modules/
+dist/
+build/
+
+# Python / Backend virtual environment and compiled files
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# Environment variables (sensitive information)
+.env
+backend/.env
+
+# IDE and OS generated files
+.DS_Store
+.vscode/
+.idea/
+npm-debug.log*
+yarn-debug.log*
+.cache/
+
+# Large documentation and setup files (can be provided on demand)
+DEVELOPMENT_ROADMAP.md
+GOOGLE_OAUTH_SETUP_DETAILED.md
+GOOGLE_OAUTH_SETUP.md
+IMPLEMENTATION_BLUEPRINT.md
+VSCODE_BACKEND_SETUP.md
+
+# Other generated files
+*.log
