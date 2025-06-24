@@ -180,10 +180,10 @@ export const SimulationStep: React.FC = () => {
 
                     <HolographicButton
                       onClick={handleRunSimulation}
-                      isLoading={isLoading}
                       size="lg"
                       className="w-full sm:w-auto group"
                       glow
+                      disabled={isLoading}
                     >
                       <div className="flex items-center">
                         {isLoading ? (

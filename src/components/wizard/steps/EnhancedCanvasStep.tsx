@@ -20,7 +20,17 @@ import {
   BarChart,
   Workflow,
   Star,
-  Command
+  Command,
+  Bot,
+  Clock,
+  Database,
+  DollarSign,
+  FileText,
+  Globe,
+  Heart,
+  Mail,
+  MessageSquare,
+  Share2
 } from 'lucide-react';
 import { useWizardStore } from '../../../stores/wizardStore';
 import { useEnhancedCanvasStore } from '../../../stores/enhancedCanvasStore';

@@ -35,7 +35,7 @@ export const BlueprintStep: React.FC = () => {
 
   // Update edited blueprint
   const handleUpdateBlueprint = (field: string, value: any) => {
-    setEditedBlueprint(prev => ({
+    setEditedBlueprint((prev: any) => ({
       ...prev,
       [field]: value
     }));
@@ -48,7 +48,7 @@ export const BlueprintStep: React.FC = () => {
       ...updatedAgents[index],
       [field]: value
     };
-    setEditedBlueprint(prev => ({
+    setEditedBlueprint((prev: { suggested_structure: any; }) => ({
       ...prev,
       suggested_structure: {
         ...prev.suggested_structure,
@@ -64,7 +64,7 @@ export const BlueprintStep: React.FC = () => {
       ...updatedWorkflows[index],
       [field]: value
     };
-    setEditedBlueprint(prev => ({
+    setEditedBlueprint((prev: { suggested_structure: any; }) => ({
       ...prev,
       suggested_structure: {
         ...prev.suggested_structure,
@@ -208,7 +208,7 @@ export const BlueprintStep: React.FC = () => {
                   <input
                     type="text"
                     value={editedBlueprint.suggested_structure.guild_name}
-                    onChange={(e) => setEditedBlueprint(prev => ({
+                    onChange={(e) => setEditedBlueprint((prev: { suggested_structure: any; }) => ({
                       ...prev,
                       suggested_structure: {
                         ...prev.suggested_structure,
@@ -222,7 +222,7 @@ export const BlueprintStep: React.FC = () => {
                   <label className="block text-sm text-gray-400 mb-1">Guild Purpose</label>
                   <textarea
                     value={editedBlueprint.suggested_structure.guild_purpose}
-                    onChange={(e) => setEditedBlueprint(prev => ({
+                    onChange={(e) => setEditedBlueprint((prev: { suggested_structure: any; }) => ({
                       ...prev,
                       suggested_structure: {
                         ...prev.suggested_structure,
@@ -375,7 +375,7 @@ export const BlueprintStep: React.FC = () => {
                           description: "Describe this agent's responsibilities and capabilities",
                           tools_needed: ["Tool 1", "Tool 2"]
                         };
-                        setEditedBlueprint(prev => ({
+                        setEditedBlueprint((prev: { suggested_structure: { agents: any; }; }) => ({
                           ...prev,
                           suggested_structure: {
                             ...prev.suggested_structure,
@@ -480,7 +480,7 @@ export const BlueprintStep: React.FC = () => {
                           description: "Describe this workflow's function and purpose",
                           trigger_type: "manual"
                         };
-                        setEditedBlueprint(prev => ({
+                        setEditedBlueprint((prev: { suggested_structure: { workflows: any; }; }) => ({
                           ...prev,
                           suggested_structure: {
                             ...prev.suggested_structure,

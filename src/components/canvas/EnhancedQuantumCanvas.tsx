@@ -14,6 +14,7 @@ import {
   Connection,
   ReactFlowProvider,
   useReactFlow,
+  BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
@@ -288,8 +289,8 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
   onExecute,
   isExecuting = false
 }) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>(initialNodes || []);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>(initialEdges || []);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes || []);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges || []);
   const [isMinimapVisible, setIsMinimapVisible] = useState(true);
   const [selectedNodeType, setSelectedNodeType] = useState<string | null>(null);
   const [isGridVisible, setIsGridVisible] = useState(true);
@@ -928,9 +929,9 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
                   onClick={() => addSmartNode(tool.type)}
                   draggable
                   onDragStart={(event) => {
-                    const dragEvent = event as React.DragEvent<HTMLDivElement>;
+                    const dragEvent = event as unknown as React.DragEvent<HTMLDivElement>;
                     dragEvent.dataTransfer.setData('application/reactflow', tool.type);
-                    event.dataTransfer.effectAllowed = 'move';
+                    dragEvent.dataTransfer.effectAllowed = 'move';
                   }}
                 >
                   <GlassCard variant="subtle" className="p-4 hover:bg-white/10 transition-all duration-200 group-hover:border-white/30">
@@ -1035,7 +1036,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           onInit={setReactFlowInstance}
         >
           <Background 
-            variant={isGridVisible ? 'dots' : undefined}
+            variant={isGridVisible ? BackgroundVariant.Dots : undefined}
             gap={20}
             size={1}
             color="#ffffff"

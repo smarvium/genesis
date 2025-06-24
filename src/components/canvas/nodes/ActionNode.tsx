@@ -15,9 +15,9 @@ interface ActionNodeData {
 }
 
 // Create a type that extends NodeProps but with required width/height
-type ActionNodeProps = NodeProps<ActionNodeData>;
+type ActionNodeProps = NodeProps;
 
-export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
+export const ActionNode = memo<ActionNodeProps>(({ data, selected }: ActionNodeProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'border-blue-400 shadow-blue-400/30';

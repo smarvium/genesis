@@ -256,7 +256,7 @@ export const SimulationLab: React.FC<SimulationLabProps> = ({
     
     // Fallback responses based on the message content
     if (message.toLowerCase().includes('high load')) {
-      return `Based on our simulation, ${currentAgent?.name} can handle up to 500 concurrent requests with an average response time of 1.2 seconds. Under high load scenarios, we've optimized the ${blueprint?.suggested_structure.guild_name} to gracefully degrade non-critical functions while maintaining 99.7% uptime for core operations.`;
+      return `Based on our simulation, ${currentAgent?.name} can handle up to 500 concurrent requests with an average response time of 1.2 seconds. Under high load scenarios, we've optimized the ${currentAgent?.name} agent to gracefully degrade non-critical functions while maintaining 99.7% uptime for core operations.`;
     }
     
     if (message.toLowerCase().includes('error')) {
@@ -264,7 +264,7 @@ export const SimulationLab: React.FC<SimulationLabProps> = ({
     }
     
     if (message.toLowerCase().includes('workflow') || message.toLowerCase().includes('process')) {
-      return `The ${blueprint?.suggested_structure.guild_name} workflows are optimized for both performance and reliability. Each workflow has built-in retry logic, input validation, and progress tracking. Our simulations show they can process approximately 10,000 operations per hour with negligible error rates.`;
+      return `The ${currentAgent?.name} workflows are optimized for both performance and reliability. Each workflow has built-in retry logic, input validation, and progress tracking. Our simulations show they can process approximately 10,000 operations per hour with negligible error rates.`;
     }
     
     // Default response

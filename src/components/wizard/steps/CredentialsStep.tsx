@@ -404,7 +404,7 @@ export const CredentialsStep: React.FC = () => {
                     Setup Instructions
                   </h4>
                   <ol className="list-decimal list-inside space-y-2 text-sm text-gray-300">
-                    {credential.instructions.map((instruction, index) => (
+                    {credential.instructions.map((instruction: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined, index: React.Key | null | undefined) => (
                       <li key={index}>{instruction}</li>
                     ))}
                   </ol>
