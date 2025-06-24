@@ -62,6 +62,7 @@ import {
   Zap
 } from 'lucide-react';
 import type { NodeTypes } from '@xyflow/react';
+import type { NodeProps } from '@xyflow/react';
 import { AgentNode as AgentNodeComponent } from './nodes/AgentNode';
 import { TriggerNode as TriggerNodeComponent } from './nodes/TriggerNode';
 import { ActionNode as ActionNodeComponent } from './nodes/ActionNode';
@@ -72,13 +73,111 @@ import { HolographicButton } from '../ui/HolographicButton';
 import { useCanvasStore } from '../../stores/canvasStore';
 import type { Blueprint } from '../../types';
 
-// Define node types with proper typing
+// Define custom data interfaces for each node type
+interface AgentNodeData {
+  label: string;
+  role: string;
+  description: string;
+  tools: string[];
+  personality?: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  color: string;
+  status: 'ready' | 'executing' | 'paused' | 'error' | 'completed';
+  performance?: {
+    averageResponseTime: number;
+    successRate: number;
+    lastExecution?: string;
+  };
+  metadata?: Record<string, any>;
+}
+
+interface TriggerNodeData {
+  label: string;
+  triggerType: 'manual' | 'schedule' | 'webhook' | 'event';
+  description: string;
+  icon?: React.ComponentType<any>;
+  color: string;
+  config?: Record<string, any>;
+  status: 'ready' | 'active' | 'triggered' | 'error';
+  schedule?: {
+    frequency?: string;
+    nextRun?: string;
+    timezone?: string;
+  };
+  webhook?: {
+    url?: string;
+    method?: string;
+    headers?: Record<string, string>;
+  };
+}
+
+interface ActionNodeData {
+  label: string;
+  description: string;
+  actionType: 'api' | 'email' | 'database' | 'webhook' | 'notification';
+  icon?: React.ComponentType<any>;
+  color: string;
+  config?: Record<string, any>;
+  status: 'pending' | 'executing' | 'completed' | 'error';
+  validation?: {
+    isValid: boolean;
+    errors: string[];
+  };
+  metrics?: {
+    executionCount: number;
+    averageTime: number;
+    lastRun?: string;
+  };
+}
+
+interface ConditionNodeData {
+  label: string;
+  description: string;
+  conditionType: 'if' | 'switch' | 'filter' | 'gate';
+  condition: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  color: string;
+  status: 'ready' | 'evaluating' | 'true' | 'false' | 'error';
+}
+
+interface DelayNodeData {
+  label: string;
+  description: string;
+  delayType: 'fixed' | 'dynamic' | 'conditional';
+  duration: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  color: string;
+  status: 'ready' | 'waiting' | 'paused' | 'completed' | 'error';
+}
+
+// Create wrapper components that properly implement NodeProps<T>
+const AgentNodeWrapper: React.FC<NodeProps<AgentNodeData>> = (props) => {
+  return <AgentNodeComponent {...props} />;
+};
+
+const TriggerNodeWrapper: React.FC<NodeProps<TriggerNodeData>> = (props) => {
+  return <TriggerNodeComponent {...props} />;
+};
+
+const ActionNodeWrapper: React.FC<NodeProps<ActionNodeData>> = (props) => {
+  return <ActionNodeComponent {...props} />;
+};
+
+const ConditionNodeWrapper: React.FC<NodeProps<ConditionNodeData>> = (props) => {
+  return <ConditionNodeComponent {...props} />;
+};
+
+const DelayNodeWrapper: React.FC<NodeProps<DelayNodeData>> = (props) => {
+  return <DelayNodeComponent {...props} />;
+};
+
+// Define node types with proper typing using wrapper components
 const nodeTypes: NodeTypes = {
-  agent: AgentNodeComponent,
-  trigger: TriggerNodeComponent,
-  action: ActionNodeComponent,
-  condition: ConditionNodeComponent,
-  delay: DelayNodeComponent,
+  agent: AgentNodeWrapper,
+  trigger: TriggerNodeWrapper,
+  action: ActionNodeWrapper,
+  condition: ConditionNodeWrapper,
+  delay: DelayNodeWrapper,
 };
 
 const proOptions = {

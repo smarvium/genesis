@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect, useCallback } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
+import { Handle, Position, NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Bot, Settings, Play, Pause, MoreHorizontal, Zap, Brain, CheckCircle, AlertCircle, Clock, BarChart } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
@@ -23,7 +23,7 @@ interface AgentNodeData {
 
 type AgentNodeProps = NodeProps<AgentNodeData>;
 
-export const AgentNode = memo<AgentNodeProps>(({ data, selected = false }) => {
+export const AgentNode = memo<AgentNodeProps>(({ data, selected }) => {
   // Null check for data
   if (!data) {
     return (

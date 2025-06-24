@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useState, useEffect } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
+import { Handle, Position, NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Play, Calendar, Globe, Zap, MoreHorizontal, AlertCircle, AlertTriangle } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
@@ -26,7 +26,7 @@ interface TriggerNodeData {
 
 type TriggerNodeProps = NodeProps<TriggerNodeData>;
 
-export const TriggerNode = memo<TriggerNodeProps>(({ data, selected = false }) => {
+export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
   // Null check for data - ISSUE #1 FIXED
   if (!data) {
     return (

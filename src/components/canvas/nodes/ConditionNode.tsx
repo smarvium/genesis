@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
+import { Handle, Position, NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { GitBranch, Target, MoreHorizontal, Check, X, AlertCircle } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
@@ -16,7 +16,7 @@ interface ConditionNodeData {
 
 type ConditionNodeProps = NodeProps<ConditionNodeData>;
 
-export const ConditionNode = memo<ConditionNodeProps>(({ data, selected = false }) => {
+export const ConditionNode = memo<ConditionNodeProps>(({ data, selected }) => {
   // Null check for data
   if (!data) {
     return null;

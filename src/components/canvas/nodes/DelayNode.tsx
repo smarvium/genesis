@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect, useCallback } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
+import { Handle, Position, NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Clock, Timer, MoreHorizontal, Pause, CheckCircle, Settings, Play } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
@@ -16,7 +16,7 @@ interface DelayNodeData {
 
 type DelayNodeProps = NodeProps<DelayNodeData>;
 
-export const DelayNode = memo<DelayNodeProps>(({ data, selected = false }) => {
+export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
   // Null check for data
   if (!data) {
     return null;

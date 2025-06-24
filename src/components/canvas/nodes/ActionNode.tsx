@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useState } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
+import { Handle, Position, NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Settings, Mail, Database, Globe, MoreHorizontal, CheckCircle, Clock, AlertCircle, AlertTriangle, BarChart } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
@@ -25,7 +25,7 @@ interface ActionNodeData {
 
 type ActionNodeProps = NodeProps<ActionNodeData>;
 
-export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => {
+export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
   // Null check for data
   if (!data) {
     return (
