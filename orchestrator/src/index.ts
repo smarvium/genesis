@@ -3,10 +3,23 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import { createClient } from '@supabase/supabase-js';
-import { createClient as createRedisClient } from 'redis';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient as createRedisClient, RedisClientType } from 'redis';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+
+// Define node structure interface
+interface NodeData {
+  label: string;
+  [key: string]: any;
+}
+
+interface WorkflowNode {
+  id: string;
+  type: string;
+  position: { x: number; y: number };
+  data: NodeData;
+}
 
 // Initialize Express app
 const app = express();
@@ -16,11 +29,11 @@ const AGENT_SERVICE_URL = process.env.AGENT_SERVICE_URL || 'http://localhost:800
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL as string;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
-let supabase;
+let supabase: SupabaseClient | undefined;
 
 // Initialize Redis client
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-let redisClient;
+let redisClient: RedisClientType | undefined;
 
 // Setup middleware
 app.use(cors());
@@ -97,7 +110,12 @@ app.post('/generateCanvas', async (req, res) => {
 // Execute workflow endpoint
 app.post('/executeFlow', async (req, res) => {
   try {
-    const { flowId, nodes, edges, context = {} } = req.body;
+    const { flowId, nodes, edges, context = {} }: {
+      flowId?: string;
+      nodes: WorkflowNode[];
+      edges: any[];
+      context?: any;
+    } = req.body;
     
     if (!nodes || !nodes.length) {
       return res.status(400).json({ 
@@ -120,7 +138,7 @@ app.post('/executeFlow', async (req, res) => {
     console.log(`🔄 Starting flow execution: ${executionId}`);
     
     // Find trigger nodes (entry points)
-    const triggerNodes = nodes.filter(node => node.type === 'trigger');
+    const triggerNodes = nodes.filter((node: WorkflowNode) => node.type === 'trigger');
     if (!triggerNodes.length) {
       return res.status(400).json({ 
         error: 'Invalid workflow structure',
@@ -475,7 +493,7 @@ function generateCanvasFromBlueprint(blueprint: any) {
 }
 
 // Helper function to execute workflow
-async function executeWorkflow(executionId: string, startNodeId: string, nodes: any[], edges: any[], context: any) {
+async function executeWorkflow(executionId: string, startNodeId: string, nodes: WorkflowNode[], edges: any[], context: any) {
   console.log(`⚙️ Executing workflow ${executionId} starting at node ${startNodeId}`);
   
   // This would be a more complex implementation with node traversal logic
