@@ -51,17 +51,17 @@ async function initializeClients() {
   }
 
   // Initialize Redis if URL is provided
-  if (redisUrl && !redisUrl.includes('your_redis')) {
+  if (redisUrl && !redisUrl.includes('your_redis') && !redisUrl.includes('localhost')) {
     try {
       redisClient = createRedisClient({ url: redisUrl });
       await redisClient.connect();
       console.log('✅ Redis client connected');
     } catch (error) {
-      console.error('❌ Redis connection failed:', error);
+      console.warn('⚠️ Redis connection failed - using in-memory cache instead');
       console.warn('⚠️ Using in-memory cache instead');
     }
   } else {
-    console.warn('⚠️ Redis URL not configured - using in-memory cache');
+    console.log('ℹ️ Redis not configured for development - using in-memory cache');
   }
 }
 
