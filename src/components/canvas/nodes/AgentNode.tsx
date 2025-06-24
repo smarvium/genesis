@@ -1,6 +1,6 @@
 import React, { memo, useState, useEffect, useCallback } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { motion } from 'framer-motion';
+import { motion, MotionValue } from 'framer-motion';
 import { Bot, Settings, Play, Pause, MoreHorizontal, Zap, Brain, CheckCircle, AlertCircle, Clock, BarChart } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
 import type { AgentNodeData } from '../../../types/canvas';
@@ -172,7 +172,7 @@ export const AgentNode = memo<NodeProps<AgentNodeData>>(({ data, selected = fals
             </div>
             
             <div className="flex flex-wrap gap-1">
-              {tools.slice(0, 3).map((tool, index) => (
+              {tools.slice(0, 3).map((tool: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | MotionValue<number> | MotionValue<string> | null | undefined, index: number) => (
                 <motion.span
                   key={`${tool}-${index}`}
                   initial={{ scale: 0 }}

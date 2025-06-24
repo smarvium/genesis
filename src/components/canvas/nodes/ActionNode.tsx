@@ -336,7 +336,7 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
               className="mt-3 pt-3 border-t border-yellow-500/20"
             >
               <div className="space-y-1">
-                {validation.errors.map((error, index) => (
+                {validation.errors.map((error: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined, index: React.Key | null | undefined) => (
                   <div key={index} className="flex items-center text-xs text-yellow-300">
                     <AlertTriangle className="w-3 h-3 mr-1" />
                     {error}
