@@ -15,6 +15,8 @@ import {
   ReactFlowProvider,
   useReactFlow,
   BackgroundVariant,
+  NodeTypes,
+  ComponentType
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
@@ -61,7 +63,6 @@ import {
   Zap as Lightning,
   Zap
 } from 'lucide-react';
-import type { NodeTypes } from '@xyflow/react';
 import { AgentNode as AgentNodeComponent } from './nodes/AgentNode';
 import { TriggerNode as TriggerNodeComponent } from './nodes/TriggerNode';
 import { ActionNode as ActionNodeComponent } from './nodes/ActionNode';
@@ -76,16 +77,18 @@ import type {
   TriggerNodeData, 
   ActionNodeData, 
   ConditionNodeData, 
-  DelayNodeData 
+  DelayNodeData,
+  CanvasEdge,
+  NodeData
 } from '../../types/canvas';
 
-// Define node types with proper typing
+// Define node types with flexible typing
 const nodeTypes: NodeTypes = {
-  agent: AgentNodeComponent,
-  trigger: TriggerNodeComponent,
-  action: ActionNodeComponent,
-  condition: ConditionNodeComponent,
-  delay: DelayNodeComponent,
+  agent: AgentNodeComponent as ComponentType<any>,
+  trigger: TriggerNodeComponent as ComponentType<any>,
+  action: ActionNodeComponent as ComponentType<any>,
+  condition: ConditionNodeComponent as ComponentType<any>,
+  delay: DelayNodeComponent as ComponentType<any>,
 };
 
 const proOptions = {
@@ -94,9 +97,9 @@ const proOptions = {
 
 interface EnhancedQuantumCanvasProps {
   blueprint?: Blueprint;
-  initialNodes?: Node[];
-  initialEdges?: Edge[];
-  onSave?: (nodes: Node[], edges: Edge[]) => void;
+  initialNodes?: Node<NodeData>[];
+  initialEdges?: CanvasEdge[];
+  onSave?: (nodes: Node<NodeData>[], edges: CanvasEdge[]) => void;
   onExecute?: () => void;
   isExecuting?: boolean;
 }
@@ -143,7 +146,7 @@ const QuantumParticleSystem: React.FC<{ intensity: number; nodeCount: number }> 
 };
 
 // Neural Network Visualization
-const NeuralNetworkOverlay: React.FC<{ nodes: Node[] }> = ({ nodes }) => {
+const NeuralNetworkOverlay: React.FC<{ nodes: Node<NodeData>[] }> = ({ nodes }) => {
   return (
     <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
       {nodes.map((node, i) => 
@@ -195,7 +198,7 @@ const NeuralNetworkOverlay: React.FC<{ nodes: Node[] }> = ({ nodes }) => {
 
 // Smart Node Suggestions
 const SmartSuggestions: React.FC<{ 
-  selectedNode: Node | null; 
+  selectedNode: Node<NodeData> | null; 
   onAddNode: (type: string, position: { x: number; y: number }) => void;
 }> = ({ selectedNode, onAddNode }) => {
   const suggestions = useMemo(() => {
@@ -296,13 +299,13 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
   onExecute,
   isExecuting = false
 }) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes || []);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges || []);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(initialNodes || []);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<CanvasEdge>(initialEdges || []);
   const [isMinimapVisible, setIsMinimapVisible] = useState(true);
   const [selectedNodeType, setSelectedNodeType] = useState<string | null>(null);
   const [isGridVisible, setIsGridVisible] = useState(true);
   const [isNeuralNetworkVisible, setIsNeuralNetworkVisible] = useState(true);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 
@@ -384,23 +387,24 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
   const generateEnhancedNodesFromBlueprint = useCallback((blueprint: Blueprint) => {
     if (!blueprint) return;
 
-    const newNodes: Node[] = [];
-    const newEdges: Edge[] = [];
+    const newNodes: Node<NodeData>[] = [];
+    const newEdges: CanvasEdge[] = [];
 
     // Create trigger node with enhanced positioning
-    newNodes.push({
+    const triggerNode: Node<TriggerNodeData> = {
       id: 'trigger-1',
       type: 'trigger',
       position: { x: 50, y: 200 },
       data: {
         label: 'Guild Activation',
-        triggerType: 'manual' as const,
+        triggerType: 'manual',
         description: 'Initiates the guild workflow with intelligent coordination',
         icon: Rocket,
         color: 'from-emerald-500 to-teal-500',
-        status: 'ready' as const
+        status: 'ready'
       } satisfies TriggerNodeData,
-    });
+    };
+    newNodes.push(triggerNode);
 
     // Create agent nodes with smart layout algorithm
     blueprint.suggested_structure.agents.forEach((agent, index) => {
@@ -424,29 +428,30 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           personality: getAgentPersonality(agent.role),
           icon: getAgentIcon(agent.role),
           color: getAgentColor(index),
-          status: 'ready' as const
+          status: 'ready'
         } satisfies AgentNodeData,
       };
       newNodes.push(agentNode);
 
       // Enhanced connections with curved paths
       if (index === 0) {
-        newEdges.push({
+        const edge: CanvasEdge = {
           id: `trigger-agent-${index + 1}`,
           source: 'trigger-1',
           target: `agent-${index + 1}`,
-          type: 'smoothstep' as const,
+          type: 'smoothstep',
           animated: true, 
           style: { stroke: '#10b981', strokeWidth: 3 },
           markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981' },
           sourceHandle: null,
           targetHandle: null
-        });
+        };
+        newEdges.push(edge);
       }
 
       // Create intelligent connections between agents
       if (index > 0) {
-        newEdges.push({
+        const edge: CanvasEdge = {
           id: `agent-${index}-agent-${index + 1}`,
           source: `agent-${index}`,
           target: `agent-${index + 1}`,
@@ -456,7 +461,8 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' },
           sourceHandle: null,
           targetHandle: null
-        });
+        };
+        newEdges.push(edge);
       }
     });
 
@@ -475,7 +481,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           actionType: mapTriggerTypeToActionType(workflow.trigger_type),
           icon: getWorkflowIcon(workflow.trigger_type),
           color: getWorkflowColor(workflow.trigger_type),
-          status: 'pending' as const
+          status: 'pending'
         } satisfies ActionNodeData,
       };
       newNodes.push(workflowNode);
@@ -483,22 +489,23 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
       // Connect agents to workflows intelligently
       if (blueprint.suggested_structure.agents.length > 0) {
         const targetAgentIndex = Math.min(index + 1, blueprint.suggested_structure.agents.length);
-        newEdges.push({
+        const edge: CanvasEdge = {
           id: `agent-${targetAgentIndex}-workflow-${index + 1}`,
           source: `agent-${targetAgentIndex}`,
           target: `workflow-${index + 1}`,
-          type: 'smoothstep' as const,
+          type: 'smoothstep',
           animated: true, 
           style: { stroke: '#f59e0b', strokeWidth: 2 },
           markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b' },
           sourceHandle: null,
           targetHandle: null
-        });
+        };
+        newEdges.push(edge);
       }
     });
 
     setNodes(newNodes);
-    setEdges([...newEdges]);
+    setEdges(newEdges);
     addToHistory(newNodes, newEdges);
   }, []);
 
@@ -577,7 +584,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
     return triggerColors[triggerType] || 'from-gray-500 to-slate-500';
   };
 
-  const mapTriggerTypeToActionType = (triggerType: string) => {
+  const mapTriggerTypeToActionType = (triggerType: string): ActionNodeData['actionType'] => {
     const mapping: Record<string, ActionNodeData['actionType']> = {
       'schedule': 'database',
       'webhook': 'api',
@@ -589,25 +596,25 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
 
   const onConnect = useCallback(
     (params: Connection) => {
-      const edge = {
+      const edge: CanvasEdge = {
         id: `edge-${params.source}-${params.target}-${Date.now()}`,
         source: params.source || '',
         target: params.target || '',
-        sourceHandle: params.sourceHandle,
-        targetHandle: params.targetHandle,
+        sourceHandle: params.sourceHandle || null,
+        targetHandle: params.targetHandle || null,
         type: 'smoothstep',
         animated: true,
         style: { stroke: '#8b5cf6', strokeWidth: 2 },
         markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' }
       };
       const newEdges = addEdge(edge, edges);
-      setEdges([...newEdges]);
+      setEdges(newEdges);
       addToHistory(nodes, newEdges);
     },
     [edges, nodes, addToHistory, setEdges]
   );
 
-  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node<NodeData>) => {
     setSelectedNodes([node.id]);
     setSelectedNode(node);
   }, [setSelectedNodes]);
@@ -671,7 +678,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
     const nodeTemplate = nodeCreationTools.find(tool => tool.type === type);
     if (!nodeTemplate) return;
 
-    let newNode: Node;
+    let newNode: Node<NodeData>;
 
     switch (type) {
       case 'agent':
@@ -772,7 +779,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
     }
 
     const newNodes = [...nodes, newNode];
-    setNodes([...newNodes]);
+    setNodes(newNodes);
     addToHistory(newNodes, edges);
   }, [nodes, edges, addToHistory]);
 
@@ -786,8 +793,8 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
       }
     }));
     
-    setNodes([...layoutedNodes]);
-    addToHistory([...layoutedNodes], edges);
+    setNodes(layoutedNodes);
+    addToHistory(layoutedNodes, edges);
   }, [nodes, edges, addToHistory]);
 
   return (
@@ -1121,7 +1128,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
-          onNodeClick={onNodeClick as any}
+          onNodeClick={onNodeClick}
           nodeTypes={nodeTypes}
           connectionMode={ConnectionMode.Loose}
           fitView

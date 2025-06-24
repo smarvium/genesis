@@ -1,8 +1,8 @@
 // Canvas-specific types for @xyflow/react compatibility
 import type { Node, Edge } from '@xyflow/react';
 
-// Base node data interfaces that extend the required structure
-export interface BaseNodeData {
+// Base node data interface that satisfies Record<string, unknown> constraint
+export interface BaseNodeData extends Record<string, unknown> {
   label: string;
   description: string;
   icon?: React.ComponentType<any>;
@@ -11,6 +11,7 @@ export interface BaseNodeData {
   metadata?: Record<string, any>;
 }
 
+// Specific node data interfaces extending the base
 export interface AgentNodeData extends BaseNodeData {
   role: string;
   tools: string[];
@@ -66,12 +67,14 @@ export interface DelayNodeData extends BaseNodeData {
   status: 'ready' | 'waiting' | 'paused' | 'completed' | 'error';
 }
 
-// Typed node definitions for @xyflow/react
-export type AgentNode = Node<AgentNodeData, 'agent'>;
-export type TriggerNode = Node<TriggerNodeData, 'trigger'>;
-export type ActionNode = Node<ActionNodeData, 'action'>;
-export type ConditionNode = Node<ConditionNodeData, 'condition'>;
-export type DelayNode = Node<DelayNodeData, 'delay'>;
+// Enhanced Edge type that handles sourceHandle/targetHandle properly
+export interface CanvasEdge extends Omit<Edge, 'sourceHandle' | 'targetHandle'> {
+  sourceHandle: string | null;
+  targetHandle: string | null;
+}
 
-export type CanvasNode = AgentNode | TriggerNode | ActionNode | ConditionNode | DelayNode;
-export type CanvasEdge = Edge;
+// Union type for all node data
+export type NodeData = AgentNodeData | TriggerNodeData | ActionNodeData | ConditionNodeData | DelayNodeData;
+
+// Typed node definitions for @xyflow/react
+export type CanvasNode = Node<NodeData>;

@@ -21,7 +21,8 @@ export const AgentNode = memo<NodeProps<AgentNodeData>>(({ data, selected = fals
   const [progress, setProgress] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Ensure all required properties exist with defaults
+  // Safe destructuring with proper typing and defaults
+  const typedData = data as AgentNodeData;
   const {
     label = 'Untitled Agent',
     role = 'AI Assistant',
@@ -31,7 +32,7 @@ export const AgentNode = memo<NodeProps<AgentNodeData>>(({ data, selected = fals
     color = 'from-purple-500 to-blue-600',
     icon: IconComponent = Bot,
     performance
-  } = data;
+  } = typedData;
 
   // Simulate progress when executing
   useEffect(() => {
@@ -133,10 +134,10 @@ export const AgentNode = memo<NodeProps<AgentNodeData>>(({ data, selected = fals
 
               <div className="flex-1">
                 <h3 className="text-white font-semibold text-sm leading-tight">
-                  {label}
+                  {String(label)}
                 </h3>
                 <p className="text-purple-300 text-xs">
-                  {role}
+                  {String(role)}
                 </p>
               </div>
             </div>
@@ -144,7 +145,7 @@ export const AgentNode = memo<NodeProps<AgentNodeData>>(({ data, selected = fals
             <div className="flex items-center space-x-1">
               <div className="flex items-center space-x-1 px-2 py-1 bg-white/10 rounded-full">
                 {getStatusIcon(status)}
-                <span className="text-xs text-white capitalize">{status}</span>
+                <span className="text-xs text-white capitalize">{String(status)}</span>
               </div>
               
               <motion.button
@@ -161,7 +162,7 @@ export const AgentNode = memo<NodeProps<AgentNodeData>>(({ data, selected = fals
 
           {/* Description */}
           <p className="text-gray-300 text-xs mb-3 leading-relaxed">
-            {description}
+            {String(description)}
           </p>
 
           {/* Tools */}
@@ -172,15 +173,15 @@ export const AgentNode = memo<NodeProps<AgentNodeData>>(({ data, selected = fals
             </div>
             
             <div className="flex flex-wrap gap-1">
-              {tools.slice(0, 3).map((tool: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | MotionValue<number> | MotionValue<string> | null | undefined, index: number) => (
+              {tools.slice(0, 3).map((tool, index) => (
                 <motion.span
-                  key={`${tool}-${index}`}
+                  key={`${String(tool)}-${index}`}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: index * 0.1 }}
                   className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full border border-blue-500/30"
                 >
-                  {tool}
+                  {String(tool)}
                 </motion.span>
               ))}
               {tools.length > 3 && (
@@ -255,11 +256,11 @@ export const AgentNode = memo<NodeProps<AgentNodeData>>(({ data, selected = fals
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="bg-white/5 rounded p-2">
                   <div className="text-gray-400">Avg Response</div>
-                  <div className="text-blue-400 font-medium">{performance.averageResponseTime}ms</div>
+                  <div className="text-blue-400 font-medium">{String(performance.averageResponseTime)}ms</div>
                 </div>
                 <div className="bg-white/5 rounded p-2">
                   <div className="text-gray-400">Success Rate</div>
-                  <div className="text-green-400 font-medium">{performance.successRate}%</div>
+                  <div className="text-green-400 font-medium">{String(performance.successRate)}%</div>
                 </div>
               </div>
             </motion.div>
@@ -297,7 +298,7 @@ export const AgentNode = memo<NodeProps<AgentNodeData>>(({ data, selected = fals
               </div>
               
               <span className="text-xs text-gray-400">
-                Agent ID: {label.toLowerCase().replace(/\s+/g, '-')}
+                Agent ID: {String(label).toLowerCase().replace(/\s+/g, '-')}
               </span>
             </div>
           </motion.div>
