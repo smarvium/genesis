@@ -152,17 +152,6 @@ export const EnhancedWizardFlow: React.FC = () => {
       </div>
 
       {/* Phase 2 Badge */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 1 }}
-        className="fixed bottom-4 left-4 z-40"
-      >
-        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 p-3 rounded-xl border border-white/20 backdrop-blur-sm">
-          <div className="text-white font-semibold text-sm">Phase 2</div>
-          <div className="text-white/80 text-xs">Canvas & Workflow Engine</div>
-        </div>
-      </motion.div>
     </MagicalBackground>
   );
 };

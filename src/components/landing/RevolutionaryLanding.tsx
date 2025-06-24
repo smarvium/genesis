@@ -471,24 +471,6 @@ export const RevolutionaryLanding: React.FC<RevolutionaryLandingProps> = ({
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-12 px-6 lg:px-12 relative">
-        {/* Bolt.new Attribution in Footer */}
-        <div className="absolute top-4 right-4">
-          <a
-            href="https://bolt.new"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors group"
-            title="Powered by Bolt.new"
-          >
-            <img
-              src="/black_circle_360x360.png"
-              alt="Powered by Bolt.new"
-              className="w-8 h-8 rounded-full group-hover:scale-110 transition-transform duration-200"
-            />
-            <span className="text-xs font-medium">Powered by Bolt.new</span>
-          </a>
-        </div>
-        
         <div className="mx-auto max-w-7xl flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center space-x-4 mb-6 md:mb-0">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
@@ -500,8 +482,16 @@ export const RevolutionaryLanding: React.FC<RevolutionaryLandingProps> = ({
             </div>
           </div>
           <p className="text-gray-400 text-sm">
-            © 2025 GenesisOS. Crafting divine-level business automation. Built with love and AI.
+            © 2025 GenesisOS. Crafting divine-level business automation.
           </p>
+          <a
+            href="https://bolt.new"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-400 hover:text-white transition-colors text-sm"
+          >
+            Built with Bolt.new
+          </a>
         </div>
       </footer>
     </MagicalBackground>

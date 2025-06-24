@@ -13,7 +13,7 @@ export const BackendStatus: React.FC<BackendStatusProps> = ({ className = '' }) 
   const [lastCheck, setLastCheck] = useState<Date>(new Date());
   const [mode, setMode] = useState<string>('');
   const [suggestedUrl, setSuggestedUrl] = useState<string>('');
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true); // Start minimized by default
   const [showDetails, setShowDetails] = useState(false);
   const [phase, setPhase] = useState<string>('1');
 
