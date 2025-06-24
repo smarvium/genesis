@@ -15,7 +15,6 @@ import {
   ReactFlowProvider,
   useReactFlow,
   BackgroundVariant,
-  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
