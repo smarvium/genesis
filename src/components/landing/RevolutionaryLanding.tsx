@@ -152,7 +152,7 @@ export const RevolutionaryLanding: React.FC<RevolutionaryLandingProps> = ({
             Sign In
           </HolographicButton>
           <HolographicButton variant="primary" glow onClick={onGetStarted}>
-            Enter Genesis
+            Enter as Guest
           </HolographicButton>
         </motion.div>
       </nav>
@@ -451,8 +451,8 @@ export const RevolutionaryLanding: React.FC<RevolutionaryLandingProps> = ({
                 className="text-xl px-12 py-6"
               >
                 <Sparkles className="w-6 h-6 mr-3" />
-                Begin Your Genesis
-                <motion.div
+                Try GenesisOS Now
+                  Enter as Guest
                   animate={{ rotate: 360 }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                   className="ml-3"
@@ -463,7 +463,7 @@ export const RevolutionaryLanding: React.FC<RevolutionaryLandingProps> = ({
             </motion.div>
 
             <p className="mt-8 text-sm text-gray-400">
-              🚀 Deploy in 3 minutes • 🧠 AI-powered from genesis • ⚡ Infinite scale guaranteed
+              🚀 No signup required • 🧠 AI-powered experience • ⚡ Try all features instantly
             </p>
           </motion.div>
         </div>
@@ -471,6 +471,24 @@ export const RevolutionaryLanding: React.FC<RevolutionaryLandingProps> = ({
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-12 px-6 lg:px-12 relative">
+        {/* Bolt.new Attribution in Footer */}
+        <div className="absolute top-4 right-4">
+          <a
+            href="https://bolt.new"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors group"
+            title="Powered by Bolt.new"
+          >
+            <img
+              src="/black_circle_360x360.png"
+              alt="Powered by Bolt.new"
+              className="w-8 h-8 rounded-full group-hover:scale-110 transition-transform duration-200"
+            />
+            <span className="text-xs font-medium">Powered by Bolt.new</span>
+          </a>
+        </div>
+        
         <div className="mx-auto max-w-7xl flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center space-x-4 mb-6 md:mb-0">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">

@@ -48,7 +48,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
     } catch (error) {
       console.error('Auth initialization error:', error);
-      set({ loading: false, connectionError: true });
+      // Don't block the app if auth fails - allow guest mode
+      console.warn('⚠️ Authentication unavailable - enabling guest mode fallback');
+      set({ loading: false, connectionError: false });
     }
   },
 

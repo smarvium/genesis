@@ -14,19 +14,16 @@ const hasPlaceholderValues =
 
 // Enhanced validation and error handling
 if (hasPlaceholderValues) {
-  console.warn('⚠️ Supabase not configured - using placeholder values');
-  console.warn('Please update your .env file with actual Supabase credentials:');
-  console.warn('1. Create a Supabase project at https://supabase.com');
-  console.warn('2. Get your project URL and anon key from Settings > API');
-  console.warn('3. Replace placeholder values in .env file');
-  console.warn('VITE_SUPABASE_URL:', supabaseUrl ? '🔄 Placeholder detected' : '❌ Missing');
-  console.warn('VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? '🔄 Placeholder detected' : '❌ Missing');
+  console.info('ℹ️ Supabase not configured - guest mode available');
+  console.info('To enable full authentication features:');
+  console.info('1. Create a Supabase project at https://supabase.com');
+  console.info('2. Get your project URL and anon key from Settings > API');
+  console.info('3. Update your .env file with actual Supabase credentials');
 }
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('❌ Missing Supabase environment variables');
-  console.error('VITE_SUPABASE_URL:', supabaseUrl ? '✅ Set' : '❌ Missing');
-  console.error('VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? '✅ Set' : '❌ Missing');
+  console.info('ℹ️ Supabase environment variables not configured');
+  console.info('App will run in guest mode with full functionality');
 }
 
 // Validate URL format only if not using placeholder values

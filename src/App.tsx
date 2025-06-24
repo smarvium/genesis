@@ -13,6 +13,7 @@ type AppState = 'landing' | 'auth' | 'app';
 function App() {
   const { user, loading, initialize } = useAuthStore();
   const [appState, setAppState] = useState<AppState>('landing');
+  const [guestMode, setGuestMode] = useState(false);
 
   useEffect(() => {
     console.log('🚀 Phase 3: Initializing GenesisOS with Backend Integration...');
@@ -21,17 +22,17 @@ function App() {
 
   useEffect(() => {
     if (!loading) {
-      if (user) {
+      if (user || guestMode) {
         console.log('✅ User authenticated - entering Genesis with Phase 3 capabilities:', user.email);
         setAppState('app');
-      } else {
+      } else if (!guestMode) {
         console.log('👤 Anonymous user - showing landing experience');
         if (appState !== 'auth') {
           setAppState('landing');
         }
       }
     }
-  }, [user, loading]);
+  }, [user, loading, guestMode]);
 
   if (loading) {
     return (
@@ -69,7 +70,7 @@ function App() {
     return (
       <>
         <RevolutionaryLanding 
-          onGetStarted={() => setAppState('auth')}
+          onGetStarted={() => setGuestMode(true)}
           onSignIn={() => setAppState('auth')}
         />
         <BackendStatus />
@@ -88,14 +89,34 @@ function App() {
     );
   }
 
-  // User is authenticated - show the main Phase 3 Genesis experience
+  // User is authenticated or in guest mode - show the main Phase 3 Genesis experience
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <Header isGuest={guestMode} />
       <main>
         <EnhancedWizardFlow />
       </main>
       <BackendStatus />
+      
+      {/* Bolt.new Attribution - Fixed Position */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <a
+          href="https://bolt.new"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block hover:scale-110 transition-transform duration-200 group"
+          title="Powered by Bolt.new"
+        >
+          <div className="relative">
+            <img
+              src="/black_circle_360x360.png"
+              alt="Powered by Bolt.new"
+              className="w-12 h-12 rounded-full shadow-lg group-hover:shadow-xl transition-shadow duration-200"
+            />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+          </div>
+        </a>
+      </div>
     </div>
   );
 }
