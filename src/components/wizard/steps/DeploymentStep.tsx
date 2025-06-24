@@ -23,13 +23,13 @@ export const DeploymentStep: React.FC = () => {
         if (simulationResults && !deploymentId && !isLoading) {
           const result = await deployGuild();
           if (result.error) {
-            setErrors({ submit: result.error.message });
+            setErrors([result.error.message]);
           } else {
             // Deployment initiated successfully
           }
         }
       } catch (error: any) {
-        setErrors({ submit: error.message || 'An unexpected error occurred' });
+        setErrors([error.message || 'An unexpected error occurred']);
       }
     };
     
