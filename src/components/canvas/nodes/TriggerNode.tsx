@@ -74,6 +74,13 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected = false }) =
     }
   }, []);
 
+  // Ensure required fields exist with default values - ISSUE #3 FIXED
+  const label = data.label || 'Untitled Trigger';
+  const description = data.description || 'No description available';
+  const triggerType = data.triggerType || 'manual';
+  const status = data.status || 'ready';
+  const color = data.color || 'from-emerald-500 to-green-600';
+
   // Validate trigger configuration
   useEffect(() => {
     const validate = () => {
@@ -91,12 +98,6 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected = false }) =
     };
     setIsValidated(validate());
   }, [data, triggerType]);
-  // Ensure required fields exist with default values - ISSUE #3 FIXED
-  const label = data.label || 'Untitled Trigger';
-  const description = data.description || 'No description available';
-  const triggerType = data.triggerType || 'manual';
-  const status = data.status || 'ready';
-  const color = data.color || 'from-emerald-500 to-green-600';
 
   const TriggerIcon = data.icon || getTriggerIcon(triggerType);
 
