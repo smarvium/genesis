@@ -9,7 +9,8 @@ export const BlueprintStep: React.FC = () => {
   const { blueprint, setStep, updateBlueprint } = useWizardStore();
   const [showDetails, setShowDetails] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [editedBlueprint, setEditedBlueprint] = useState<any>(null);
+  const [editedBlueprint, setEditedBlueprint] = useState<Blueprint | null>(null);
+  const [isGeneratingCanvas, setIsGeneratingCanvas] = useState(false);
 
   if (!blueprint) {
     return null;
@@ -74,7 +75,8 @@ export const BlueprintStep: React.FC = () => {
   };
 
   const handleApprove = () => {
-    setStep('credentials');
+    setIsGeneratingCanvas(true);
+    setStep('canvas');
   };
 
   const handleEdit = () => {
@@ -530,9 +532,15 @@ export const BlueprintStep: React.FC = () => {
               Refine Vision
             </HolographicButton>
             
-            <HolographicButton onClick={handleApprove} size="lg" glow className="group">
+            <HolographicButton 
+              onClick={handleApprove} 
+              size="lg" 
+              glow 
+              className="group"
+              disabled={isGeneratingCanvas}
+            >
               <CheckCircle className="w-5 h-5 mr-2 group-hover:text-green-400 transition-colors" />
-              Approve Blueprint
+              {isGeneratingCanvas ? 'Generating Canvas...' : 'Approve Blueprint'}
               <motion.div
                 animate={{ x: [0, 5, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
@@ -549,17 +557,19 @@ export const BlueprintStep: React.FC = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
+        transition={{ delay: 1.0 }}
         className="mt-8 text-center"
       >
         <GlassCard variant="subtle" className="p-6 max-w-2xl mx-auto">
           <div className="flex items-center justify-center mb-4">
             <CheckCircle className="w-8 h-8 text-green-400 mr-3" />
-            <h4 className="text-lg font-semibold text-white">Blueprint Generated Successfully!</h4>
+            <h4 className="text-lg font-semibold text-white">
+              Blueprint Ready for Canvas Generation!
+            </h4>
           </div>
           <p className="text-gray-300 text-sm leading-relaxed">
-            Your blueprint has been crafted with enterprise-grade intelligence. 
-            Next, we'll connect your tools and credentials to bring these agents to life.
+            Your blueprint has been crafted with enterprise-grade intelligence.
+            Click "Approve Blueprint" to generate a visual workflow in the Canvas.
           </p>
         </GlassCard>
       </motion.div>

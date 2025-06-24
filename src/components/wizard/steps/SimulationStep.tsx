@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { Play, CheckCircle, AlertCircle, ArrowRight, Brain, Zap, Clock, Settings, Cpu } from 'lucide-react';
+import { Play, CheckCircle, AlertCircle, ArrowRight, Brain, Zap, Clock, Settings, Cpu, Beaker } from 'lucide-react';
 import { useWizardStore } from '../../../stores/wizardStore';
-import { Button } from '../../ui/Button';
 import { GlassCard } from '../../ui/GlassCard';
 import { HolographicButton } from '../../ui/HolographicButton';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/Card';
-import { Input } from '../../ui/Input';
+import { SimulationLab } from '../../simulation/SimulationLab';
 
 export const SimulationStep: React.FC = () => {
   const { 
@@ -19,12 +17,7 @@ export const SimulationStep: React.FC = () => {
   } = useWizardStore();
   
   const [showDetails, setShowDetails] = useState(false);
-  const [simulationSettings, setSimulationSettings] = useState({
-    llmChoice: 'gemini_flash', // Default to Gemini Flash
-    simulationDuration: 60,     // Seconds
-    simulationType: 'comprehensive',
-    voiceEnabled: true
-  });
+  const [showLabView, setShowLabView] = useState(false);
 
   const handleRunSimulation = async () => {
     // We'll pass the simulation settings to the runSimulation function
@@ -35,27 +28,48 @@ export const SimulationStep: React.FC = () => {
   const handleDeploy = () => {
     setStep('deployment');
   };
-
-  const handleSettingChange = (setting: string, value: any) => {
-    setSimulationSettings(prev => ({
-      ...prev,
-      [setting]: value
-    }));
-  };
   const hasValidCredentials = Object.keys(credentials).length > 0;
 
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 flex flex-col items-center">
           <h1 className="text-3xl font-bold text-white mb-4">
-            Test Your Guild
+            Simulation Lab
           </h1>
           <p className="text-lg text-gray-300">
-            Run an intelligent simulation to see how your digital workers will perform
+            Test your guild in a realistic environment before deployment
           </p>
+          
+          <div className="mt-4 flex items-center space-x-1 bg-white/10 rounded-lg p-1 border border-white/20">
+            <HolographicButton
+              variant={!showLabView ? 'primary' : 'ghost'}
+              size="sm"
+              onClick={() => setShowLabView(false)}
+            >
+              Simple Test
+            </HolographicButton>
+            
+            <HolographicButton
+              variant={showLabView ? 'primary' : 'ghost'}
+              size="sm"
+              onClick={() => setShowLabView(true)}
+            >
+              Advanced Lab
+            </HolographicButton>
+          </div>
         </div>
 
+        {showLabView ? (
+          <SimulationLab
+            guildId={blueprint?.suggested_structure.guild_name || 'test-guild'}
+            agents={blueprint?.suggested_structure.agents || []}
+            onResults={(results) => {
+              console.log('✅ Simulation completed:', results);
+              runSimulation();
+            }}
+          />
+        ) : (
         <GlassCard variant="medium" className="p-6 mb-8">
           <div className="flex items-center mb-6">
             <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center mr-4">
@@ -67,7 +81,7 @@ export const SimulationStep: React.FC = () => {
             </div>
           </div>
 
-            {!simulationResults ? (
+          {!simulationResults ? (
               <div className="text-center py-8">
                 {!hasValidCredentials ? (
                   <div className="space-y-4">
@@ -293,13 +307,15 @@ export const SimulationStep: React.FC = () => {
               </div>
             )}
         </GlassCard>
+        )}
 
         {simulationResults && (
           <div className="flex justify-center">
-            <Button onClick={handleDeploy} size="lg">
+            <HolographicButton onClick={handleDeploy} size="lg" glow>
+              <Beaker className="w-5 h-5 mr-2" />
               Deploy Live Guild
               <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+            </HolographicButton>
           </div>
         )}
       </div>

@@ -70,6 +70,8 @@ import { ConditionNode as ConditionNodeComponent } from './nodes/ConditionNode';
 import { DelayNode as DelayNodeComponent } from './nodes/DelayNode';
 import { GlassCard } from '../ui/GlassCard';
 import { HolographicButton } from '../ui/HolographicButton';
+import { NodeConfigPanel } from '../ui/NodeConfig/NodeConfigPanel';
+import { useCanvasControls } from '../../hooks/useCanvasControls';
 import { useCanvasStore } from '../../stores/canvasStore';
 import type { Blueprint } from '../../types';
 import type {
@@ -305,9 +307,25 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
   const [selectedNodeType, setSelectedNodeType] = useState<string | null>(null);
   const [isGridVisible, setIsGridVisible] = useState(true);
   const [isNeuralNetworkVisible, setIsNeuralNetworkVisible] = useState(true);
-  const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
+
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [activeFeature, setActiveFeature] = useState<string | null>(null);
+  const [isAnyNodeDragging, setIsAnyNodeDragging] = useState(false);
+  const [showSimulation, setShowSimulation] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
+
+  // Get canvas controls
+  const {
+    selectedNode,
+    isNodeConfigOpen,
+    openNodeConfig,
+    closeNodeConfig,
+    updateNodeData,
+    deleteNode
+  } = useCanvasControls();
 
   // Enhanced Canvas state
   const {
@@ -616,7 +634,11 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
 
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node<NodeData>) => {
     setSelectedNodes([node.id]);
-    setSelectedNode(node);
+    if (event.detail === 2) {  // Double-click to open config
+      openNodeConfig(node.id);
+    } else {
+      setSelectedNode(node);
+    }
   }, [setSelectedNodes]);
 
   const handleSave = useCallback(() => {
@@ -1127,7 +1149,9 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
-          onNodeClick={onNodeClick}
+          onNodeClick={isAnyNodeDragging ? undefined : onNodeClick}
+          onNodeDragStart={() => setIsAnyNodeDragging(true)}
+          onNodeDragStop={() => setIsAnyNodeDragging(false)}
           nodeTypes={nodeTypes}
           connectionMode={ConnectionMode.Loose}
           fitView
@@ -1259,6 +1283,16 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           </ReactFlowPanel>
         </ReactFlow>
       </div>
+
+      {/* Node Configuration Panel */}
+      {isNodeConfigOpen && selectedNode && (
+        <NodeConfigPanel
+          node={selectedNode}
+          onClose={closeNodeConfig}
+          onUpdate={updateNodeData}
+          onDelete={deleteNode}
+        />
+      )}
 
       {/* Smart Suggestions */}
       <AnimatePresence>

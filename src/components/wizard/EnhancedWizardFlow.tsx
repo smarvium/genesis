@@ -5,6 +5,7 @@ import { MagicalBackground } from '../ui/MagicalBackground';
 import { WelcomeStep } from './steps/WelcomeStep';
 import { IntentStep } from './steps/IntentStep';
 import { BlueprintStep } from './steps/BlueprintStep';
+import { CanvasGenerationStep } from './steps/CanvasGenerationStep';
 import { EnhancedCanvasStep } from './steps/EnhancedCanvasStep';
 import { CredentialsStep } from './steps/CredentialsStep';
 import { SimulationStep } from './steps/SimulationStep';
@@ -14,6 +15,7 @@ const stepComponents = {
   welcome: WelcomeStep,
   intent: IntentStep,
   blueprint: BlueprintStep,
+  'canvas-generation': CanvasGenerationStep,
   canvas: EnhancedCanvasStep,
   credentials: CredentialsStep,
   simulation: SimulationStep,
@@ -24,6 +26,7 @@ const stepTitles = {
   welcome: "Welcome to Genesis",
   intent: "Share Your Vision",
   blueprint: "AI Blueprint",
+  "canvas-generation": "Canvas Generation",
   canvas: "Visual Canvas",
   credentials: "Connect Your Tools",
   simulation: "Test Your Guild",
@@ -34,6 +37,7 @@ const stepDescriptions = {
   welcome: "Enter the AI-native workspace revolution",
   intent: "Transform your vision into intelligent architecture",
   blueprint: "Review your AI-generated business structure",
+  "canvas-generation": "Visualize your workflow with AI",
   canvas: "Design and customize your workflow visually",
   credentials: "Connect the tools your agents will use",
   simulation: "Test your guild in a safe environment",

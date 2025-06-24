@@ -41,6 +41,8 @@ import { VoiceInterface } from '../../voice/VoiceInterface';
 import { SimulationLab } from '../../simulation/SimulationLab';
 import { Node, Edge } from '@xyflow/react';
 import { Blueprint } from '../../../types';
+import { useCanvas } from '../../../hooks/useCanvas';
+import { canvasService } from '../../../services/canvasService';
 
 export const EnhancedCanvasStep: React.FC = () => {
   const { blueprint, setStep } = useWizardStore();
@@ -66,20 +68,46 @@ export const EnhancedCanvasStep: React.FC = () => {
   const [showSimulation, setShowSimulation] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [canvasInitialized, setCanvasInitialized] = useState(false);
+  const [loadingCanvas, setLoadingCanvas] = useState(false);
+  
+  // Get canvas methods from custom hook
+  const {
+    nodes: canvasNodes,
+    edges: canvasEdges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    saveCanvas,
+    executeWorkflow,
+    isLoading,
+    error,
+    loadCanvasFromBlueprint
+  } = useCanvas();
 
+  // Initialize canvas from blueprint
   useEffect(() => {
-    // Show tutorial for first-time users
-    const hasSeenTutorial = localStorage.getItem('canvas-tutorial-seen');
-    if (!hasSeenTutorial) {
-      setShowTutorial(true);
+    if (blueprint && !canvasInitialized) {
+      setLoadingCanvas(true);
+      
+      // Load canvas from blueprint
+      loadCanvasFromBlueprint()
+        .then(() => {
+          setCanvasInitialized(true);
+          
+          // Show tutorial for first-time users
+          const hasSeenTutorial = localStorage.getItem('canvas-tutorial-seen');
+          if (!hasSeenTutorial) {
+            setShowTutorial(true);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to generate canvas:', err);
+        })
+        .finally(() => {
+          setLoadingCanvas(false);
+        });
     }
-  }, []);
-
-  // Generate canvas nodes and edges from blueprint
-  const generateCanvasFromBlueprint = useCallback((blueprint: Blueprint) => {
-    if (!blueprint || !blueprint.suggested_structure) return;
-    
-    console.log('🎨 Generating canvas from blueprint:', blueprint.id);
+  }, [blueprint, canvasInitialized]);
     
     const newNodes: Node[] = [];
     const newEdges: Edge[] = [];
