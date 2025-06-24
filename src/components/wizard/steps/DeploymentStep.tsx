@@ -17,27 +17,10 @@ export const DeploymentStep: React.FC = () => {
   } = useWizardStore();
 
   useEffect(() => {
-    const deployAsync = async () => {
-      try {
-      const deployGuildAsync = async () => {
-        try {
-          const result = await deployGuild();
-          if (result.error) {
-            setErrors([result.error.message]);
-          }
-          // Deployment initiated successfully
-        } catch (error: any) {
-          setErrors([error.message || 'An unexpected error occurred']);
-        }
-          } else {
-            // Deployment initiated successfully
-          }
-        }
-      } catch (error: any) {
-        setErrors([error.message || 'An unexpected error occurred']);
-      }
-      deployGuildAsync();
-    deployAsync();
+    // Only deploy if we have simulation results and haven't deployed yet
+    if (simulationResults && !deploymentId && !isLoading) {
+      deployGuild();
+    }
   }, [simulationResults, deploymentId, isLoading, deployGuild]);
 
   // Handle successful deployment
@@ -49,7 +32,6 @@ export const DeploymentStep: React.FC = () => {
   // Handle deployment error
   const handleDeploymentError = (errorMessage: string) => {
     console.error('❌ Guild deployment failed:', errorMessage);
-    setErrors([errorMessage]);
   };
 
   const handleGoToDashboard = () => {
