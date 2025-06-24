@@ -1,7 +1,7 @@
 import React, { memo, useState, useEffect, useCallback } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { motion } from 'framer-motion';
-import { Bot, Settings, Play, Pause, MoreHorizontal, Zap, Brain, CheckCircle } from 'lucide-react';
+import { Bot, Settings, Play, Pause, MoreHorizontal, Zap, Brain, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
 
 interface AgentNodeData {
@@ -13,6 +13,12 @@ interface AgentNodeData {
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   color: string;
   status: 'ready' | 'executing' | 'paused' | 'error' | 'completed';
+  performance?: {
+    averageResponseTime: number;
+    successRate: number;
+    lastExecution?: string;
+  };
+  metadata?: Record<string, any>;
 }
 
 type AgentNodeProps = NodeProps<AgentNodeData>;
@@ -20,10 +26,18 @@ type AgentNodeProps = NodeProps<AgentNodeData>;
 export const AgentNode = memo<AgentNodeProps>(({ data, selected = false }) => {
   // Null check for data
   if (!data) {
-    return null;
+    return (
+      <GlassCard variant="medium" className="w-80 border-2 border-red-400">
+        <div className="p-4 text-center">
+          <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+          <p className="text-red-300">Invalid Agent Node</p>
+        </div>
+      </GlassCard>
+    );
   }
 
   const [progress, setProgress] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Simulate progress when executing
   useEffect(() => {
@@ -84,6 +98,7 @@ export const AgentNode = memo<AgentNodeProps>(({ data, selected = false }) => {
   const status = data.status || 'ready';
   const color = data.color || 'from-purple-500 to-blue-600';
   const IconComponent = data.icon || Bot;
+  const performance = data.performance;
 
   return (
     <motion.div
@@ -92,12 +107,15 @@ export const AgentNode = memo<AgentNodeProps>(({ data, selected = false }) => {
       transition={{ duration: 0.3 }}
       whileHover={{ scale: 1.02 }}
       className={`relative ${selected ? 'z-10' : ''}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Input Handle */}
       <Handle
         type="target"
         position={Position.Left}
         className="w-3 h-3 bg-purple-400 border-2 border-white shadow-lg"
+        style={{ zIndex: 10 }}
       />
 
       {/* Main Node */}
@@ -237,6 +255,29 @@ export const AgentNode = memo<AgentNodeProps>(({ data, selected = false }) => {
               </div>
             </motion.div>
           )}
+          {performance && (isHovered || selected) && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-3 pt-3 border-t border-white/10"
+            >
+              <h5 className="text-sm font-medium text-white mb-2 flex items-center">
+                <BarChart className="w-4 h-4 mr-2 text-blue-400" />
+                Performance Metrics
+              </h5>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="bg-white/5 rounded p-2">
+                  <div className="text-gray-400">Avg Response</div>
+                  <div className="text-blue-400 font-medium">{performance.averageResponseTime}ms</div>
+                </div>
+                <div className="bg-white/5 rounded p-2">
+                  <div className="text-gray-400">Success Rate</div>
+                  <div className="text-green-400 font-medium">{performance.successRate}%</div>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Quick Actions */}
           <motion.div
@@ -297,7 +338,17 @@ export const AgentNode = memo<AgentNodeProps>(({ data, selected = false }) => {
         type="source"
         position={Position.Right}
         className="w-3 h-3 bg-purple-400 border-2 border-white shadow-lg"
+        style={{ zIndex: 10 }}
       />
+
+      {/* Connection Points Indicator */}
+      {isHovered && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute -inset-2 border border-purple-400/30 rounded-2xl pointer-events-none"
+        />
+      )}
     </motion.div>
   );
 });

@@ -12,6 +12,16 @@ interface TriggerNodeData {
   color: string;
   config?: Record<string, any>;
   status: 'ready' | 'active' | 'triggered' | 'error';
+  schedule?: {
+    frequency?: string;
+    nextRun?: string;
+    timezone?: string;
+  };
+  webhook?: {
+    url?: string;
+    method?: string;
+    headers?: Record<string, string>;
+  };
 }
 
 type TriggerNodeProps = NodeProps<TriggerNodeData>;
@@ -19,8 +29,17 @@ type TriggerNodeProps = NodeProps<TriggerNodeData>;
 export const TriggerNode = memo<TriggerNodeProps>(({ data, selected = false }) => {
   // Null check for data - ISSUE #1 FIXED
   if (!data) {
-    return null;
+    return (
+      <GlassCard variant="medium" className="w-72 border-2 border-red-400">
+        <div className="p-4 text-center">
+          <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+          <p className="text-red-300">Invalid Trigger Node</p>
+        </div>
+      </GlassCard>
+    );
   }
+
+  const [isValidated, setIsValidated] = useState(false);
 
   const getStatusColor = useCallback((status: string) => {
     switch (status) {
@@ -49,9 +68,29 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected = false }) =
 
   const handleTriggerClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    // Add trigger logic here
+    if (triggerType === 'manual' && status === 'ready') {
+      // Simulate trigger activation
+      console.log(`Manual trigger activated: ${label}`);
+    }
   }, []);
 
+  // Validate trigger configuration
+  useEffect(() => {
+    const validate = () => {
+      switch (triggerType) {
+        case 'webhook':
+          return !!(data.webhook?.url && data.webhook?.method);
+        case 'schedule':
+          return !!(data.schedule?.frequency);
+        case 'event':
+          return !!(data.config?.event);
+        case 'manual':
+        default:
+          return true;
+      }
+    };
+    setIsValidated(validate());
+  }, [data, triggerType]);
   // Ensure required fields exist with default values - ISSUE #3 FIXED
   const label = data.label || 'Untitled Trigger';
   const description = data.description || 'No description available';
@@ -74,6 +113,7 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected = false }) =
         variant="medium" 
         className={`w-72 border-2 ${getStatusColor(status)} ${
           selected ? 'ring-2 ring-emerald-400/50' : ''
+        } ${!isValidated ? 'border-yellow-400/50' : ''} transition-all duration-200`}
         } transition-all duration-200`}
       >
         <div className="p-4">
@@ -115,6 +155,13 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected = false }) =
                 }`} />
                 <span className="text-xs text-white capitalize">{status}</span>
               </div>
+              
+              {/* Validation indicator */}
+              {!isValidated && (
+                <div className="w-6 h-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                  <AlertTriangle className="w-3 h-3 text-yellow-400" />
+                </div>
+              )}
               
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -300,7 +347,19 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected = false }) =
         type="source"
         position={Position.Right}
         className="w-3 h-3 bg-emerald-400 border-2 border-white shadow-lg"
+        style={{ zIndex: 10 }}
       />
+
+      {/* Configuration warning */}
+      {!isValidated && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-yellow-500/90 text-yellow-900 text-xs px-2 py-1 rounded whitespace-nowrap"
+        >
+          Configuration needed
+        </motion.div>
+      )}
     </motion.div>
   );
 });

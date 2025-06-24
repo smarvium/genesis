@@ -12,6 +12,15 @@ interface ActionNodeData {
   color: string;
   config?: Record<string, any>;
   status: 'pending' | 'executing' | 'completed' | 'error';
+  validation?: {
+    isValid: boolean;
+    errors: string[];
+  };
+  metrics?: {
+    executionCount: number;
+    averageTime: number;
+    lastRun?: string;
+  };
 }
 
 type ActionNodeProps = NodeProps<ActionNodeData>;
@@ -19,8 +28,17 @@ type ActionNodeProps = NodeProps<ActionNodeData>;
 export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => {
   // Null check for data
   if (!data) {
-    return null;
+    return (
+      <GlassCard variant="medium" className="w-72 border-2 border-red-400">
+        <div className="p-4 text-center">
+          <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+          <p className="text-red-300">Invalid Action Node</p>
+        </div>
+      </GlassCard>
+    );
   }
+
+  const [showMetrics, setShowMetrics] = useState(false);
 
   const getStatusColor = useCallback((status: string) => {
     switch (status) {
@@ -46,7 +64,7 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => 
 
   const handleMoreClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    // Add your more actions logic here
+    setShowMetrics(!showMetrics);
   }, []);
 
   // Ensure required fields exist
@@ -55,6 +73,8 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => 
   const actionType = data.actionType || 'api';
   const status = data.status || 'pending';
   const color = data.color || 'from-blue-500 to-purple-600';
+  const validation = data.validation;
+  const metrics = data.metrics;
 
   return (
     <motion.div
@@ -69,6 +89,7 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => 
         type="target"
         position={Position.Left}
         className="w-3 h-3 bg-blue-400 border-2 border-white shadow-lg"
+        style={{ zIndex: 10 }}
       />
 
       {/* Main Node */}
@@ -76,6 +97,7 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => 
         variant="medium" 
         className={`w-72 border-2 ${getStatusColor(status)} ${
           selected ? 'ring-2 ring-blue-400/50' : ''
+        } ${validation && !validation.isValid ? 'border-yellow-400/50' : ''} transition-all duration-200`}
         } transition-all duration-200`}
       >
         <div className="p-4">
@@ -114,6 +136,13 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => 
                 {status === 'error' && <div className="w-2 h-2 bg-red-400 rounded-full" />}
                 <span className="text-xs text-white capitalize">{status}</span>
               </div>
+              
+              {/* Validation indicator */}
+              {validation && !validation.isValid && (
+                <div className="w-6 h-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                  <AlertTriangle className="w-3 h-3 text-yellow-400" />
+                </div>
+              )}
               
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -266,6 +295,47 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => 
                 </span>
               </div>
             </motion.div>
+          {/* Metrics Panel */}
+          {metrics && showMetrics && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-3 pt-3 border-t border-white/10"
+            >
+              <h5 className="text-sm font-medium text-white mb-2 flex items-center">
+                <BarChart className="w-4 h-4 mr-2 text-blue-400" />
+                Execution Metrics
+              </h5>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="bg-white/5 rounded p-2">
+                  <div className="text-gray-400">Executions</div>
+                  <div className="text-blue-400 font-medium">{metrics.executionCount}</div>
+                </div>
+                <div className="bg-white/5 rounded p-2">
+                  <div className="text-gray-400">Avg Time</div>
+                  <div className="text-green-400 font-medium">{metrics.averageTime}ms</div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+          )}
+          {/* Validation Errors */}
+          {validation && !validation.isValid && validation.errors.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-3 pt-3 border-t border-yellow-500/20"
+            >
+              <div className="space-y-1">
+                {validation.errors.map((error, index) => (
+                  <div key={index} className="flex items-center text-xs text-yellow-300">
+                    <AlertTriangle className="w-3 h-3 mr-1" />
+                    {error}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
           )}
         </div>
 
@@ -290,6 +360,7 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => 
         type="source"
         position={Position.Right}
         className="w-3 h-3 bg-blue-400 border-2 border-white shadow-lg"
+        style={{ zIndex: 10 }}
       />
     </motion.div>
   );
