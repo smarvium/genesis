@@ -2,6 +2,7 @@
 node_modules/
 dist/
 build/
+backend/
 
 # Python / Backend virtual environment and compiled files
 venv/
