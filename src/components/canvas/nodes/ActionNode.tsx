@@ -39,6 +39,45 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
   }
 
   const [showMetrics, setShowMetrics] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  // Validate and set defaults for all data properties to ensure type safety
+  const label = data.label || 'Untitled Action';
+  const description = data.description || 'No description available';
+  const actionType = data.actionType || 'api';
+  
+  // Validate status with proper type checking
+  const validStatuses: ActionNodeData['status'][] = ['pending', 'executing', 'completed', 'error'];
+  const status = validStatuses.includes(data.status) ? data.status : 'pending';
+  
+  const color = data.color || 'from-blue-500 to-purple-600';
+  const validation = data.validation || null;
+  const metrics = data.metrics || null;
+  
+  // Ensure config is properly typed and safe
+  const config = data.config || {};
+
+  // Reactive progress updates for executing status
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (status === 'executing') {
+      interval = setInterval(() => {
+        setProgress(prev => {
+          const newProgress = prev + Math.random() * 10;
+          return newProgress >= 100 ? 100 : newProgress;
+        });
+      }, 200);
+    } else {
+      setProgress(status === 'completed' ? 100 : 0);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [status]);
 
   const getStatusColor = useCallback((status: string) => {
     switch (status) {
@@ -65,16 +104,7 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
   const handleMoreClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setShowMetrics(!showMetrics);
-  }, []);
-
-  // Ensure required fields exist
-  const label = data.label || 'Untitled Action';
-  const description = data.description || 'No description available';
-  const actionType = data.actionType || 'api';
-  const status = data.status || 'pending';
-  const color = data.color || 'from-blue-500 to-purple-600';
-  const validation = data.validation;
-  const metrics = data.metrics;
+  }, [showMetrics]);</parameter>
 
   return (
     <motion.div
