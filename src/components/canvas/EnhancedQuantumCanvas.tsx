@@ -74,6 +74,7 @@ import { NodeConfigPanel } from '../ui/NodeConfig/NodeConfigPanel';
 import { useCanvasControls } from '../../hooks/useCanvasControls';
 import { useCanvasStore } from '../../stores/canvasStore';
 import type { Blueprint } from '../../types';
+import { QuantumLoader } from '../ui/QuantumLoader';
 import type {
   AgentNodeData,
   TriggerNodeData,
@@ -86,11 +87,11 @@ import type {
 
 // Define node types with flexible typing
 const nodeTypes: NodeTypes = {
-  agent: AgentNodeComponent as ComponentType<any>,
-  trigger: TriggerNodeComponent as ComponentType<any>,
-  action: ActionNodeComponent as ComponentType<any>,
-  condition: ConditionNodeComponent as ComponentType<any>,
-  delay: DelayNodeComponent as ComponentType<any>,
+  agent: AgentNodeComponent,
+  trigger: TriggerNodeComponent,
+  action: ActionNodeComponent,
+  condition: ConditionNodeComponent,
+  delay: DelayNodeComponent,
 };
 
 const proOptions = {
