@@ -23,7 +23,7 @@ function App() {
   useEffect(() => {
     if (!loading) {
       if (user || guestMode) {
-        console.log('✅ User authenticated - entering Genesis with Phase 3 capabilities:', user.email);
+        console.log('✅ User authenticated - entering Genesis with Phase 3 capabilities:', user?.email || 'Guest Mode');
         setAppState('app');
       } else if (!guestMode) {
         console.log('👤 Anonymous user - showing landing experience');
