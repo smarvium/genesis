@@ -452,7 +452,7 @@ export const RevolutionaryLanding: React.FC<RevolutionaryLandingProps> = ({
               >
                 <Sparkles className="w-6 h-6 mr-3" />
                 Try GenesisOS Now
-                  Enter as Guest
+                <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                   className="ml-3"
