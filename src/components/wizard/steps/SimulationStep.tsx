@@ -4,6 +4,7 @@ import { useWizardStore } from '../../../stores/wizardStore';
 import { GlassCard } from '../../ui/GlassCard';
 import { HolographicButton } from '../../ui/HolographicButton';
 import { SimulationLab } from '../../simulation/SimulationLab';
+import { AIModelSelector } from '../../ui/AIModelSelector';
 
 export const SimulationStep: React.FC = () => {
   const { 
@@ -18,6 +19,7 @@ export const SimulationStep: React.FC = () => {
   
   const [showDetails, setShowDetails] = useState(false);
   const [showLabView, setShowLabView] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('gemini-flash');
 
   const handleRunSimulation = async () => {
     // We'll pass the simulation settings to the runSimulation function
@@ -29,6 +31,11 @@ export const SimulationStep: React.FC = () => {
     setStep('deployment');
   };
   const hasValidCredentials = Object.keys(credentials).length > 0;
+  
+  // When the model changes, store it in localStorage for system-wide use
+  useEffect(() => {
+    localStorage.setItem('preferred_ai_model', selectedModel);
+  }, [selectedModel]);
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -83,6 +90,14 @@ export const SimulationStep: React.FC = () => {
 
           {!simulationResults ? (
               <div className="text-center py-8">
+                <div className="max-w-xl mx-auto mb-6">
+                  <AIModelSelector
+                    selectedModelId={selectedModel}
+                    onSelect={setSelectedModel}
+                    label="Select AI Intelligence Model"
+                  />
+                </div>
+              
                 {!hasValidCredentials ? (
                   <div className="space-y-4">
                     <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
