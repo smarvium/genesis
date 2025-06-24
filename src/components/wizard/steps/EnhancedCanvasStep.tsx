@@ -106,6 +106,8 @@ export const EnhancedCanvasStep: React.FC = () => {
         .finally(() => {
           setLoadingCanvas(false);
         });
+    }
+  }, [blueprint, canvasInitialized]);
   
   const handleSaveCanvas = (nodes: any[], edges: any[]) => {
     console.log('💾 Enhanced Canvas saved:', { 
