@@ -3,31 +3,10 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Play, Calendar, Globe, Zap, MoreHorizontal, AlertCircle, AlertTriangle } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
+import type { TriggerNodeData } from '../../../types/canvas';
 
-interface TriggerNodeData {
-  label: string;
-  triggerType: 'manual' | 'schedule' | 'webhook' | 'event';
-  description: string;
-  icon?: React.ComponentType<any>;
-  color: string;
-  config?: Record<string, any>;
-  status: 'ready' | 'active' | 'triggered' | 'error';
-  schedule?: {
-    frequency?: string;
-    nextRun?: string;
-    timezone?: string;
-  };
-  webhook?: {
-    url?: string;
-    method?: string;
-    headers?: Record<string, string>;
-  };
-}
-
-export type TriggerNodeProps = NodeProps<TriggerNodeData>;
-
-export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
-  // Null check for data - ISSUE #1 FIXED
+export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = false }) => {
+  // Null check for data
   if (!data) {
     return (
       <GlassCard variant="medium" className="w-72 border-2 border-red-400">
@@ -40,6 +19,19 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
   }
 
   const [isValidated, setIsValidated] = useState(false);
+
+  // Ensure required fields exist with default values
+  const {
+    label = 'Untitled Trigger',
+    description = 'No description available',
+    triggerType = 'manual',
+    status = 'ready',
+    color = 'from-emerald-500 to-green-600',
+    icon: TriggerIcon,
+    config = {},
+    schedule,
+    webhook
+  } = data;
 
   const getStatusColor = useCallback((status: string) => {
     switch (status) {
@@ -72,34 +64,27 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
       // Simulate trigger activation
       console.log(`Manual trigger activated: ${label}`);
     }
-  }, []);
-
-  // Ensure required fields exist with default values - ISSUE #3 FIXED
-  const label = data.label || 'Untitled Trigger';
-  const description = data.description || 'No description available';
-  const triggerType = data.triggerType || 'manual';
-  const status = data.status || 'ready';
-  const color = data.color || 'from-emerald-500 to-green-600';
+  }, [triggerType, status, label]);
 
   // Validate trigger configuration
   useEffect(() => {
     const validate = () => {
       switch (triggerType) {
         case 'webhook':
-          return !!(data.webhook?.url && data.webhook?.method);
+          return !!(webhook?.url && webhook?.method);
         case 'schedule':
-          return !!(data.schedule?.frequency);
+          return !!(schedule?.frequency);
         case 'event':
-          return !!(data.config?.event);
+          return !!(config?.event);
         case 'manual':
         default:
           return true;
       }
     };
     setIsValidated(validate());
-  }, [data, triggerType]);
+  }, [triggerType, webhook, schedule, config]);
 
-  const TriggerIcon = data.icon || getTriggerIcon(triggerType);
+  const IconComponent = TriggerIcon || getTriggerIcon(triggerType);
 
   return (
     <motion.div
@@ -125,7 +110,7 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 transition={{ type: "spring", stiffness: 400 }}
               >
-                {/* Conditional animated background - ISSUE #5 FIXED */}
+                {/* Conditional animated background */}
                 {selected && (
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"
@@ -133,7 +118,7 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
                     transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
                   />
                 )}
-                {TriggerIcon && <TriggerIcon className="w-6 h-6 text-white relative z-10" />}
+                <IconComponent className="w-6 h-6 text-white relative z-10" />
               </motion.div>
 
               <div className="flex-1">
@@ -185,9 +170,9 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
             <div className="flex items-center justify-between">
               <span className="text-gray-400 text-xs font-medium">Configuration</span>
               <span className="text-emerald-400 text-xs">
-                {triggerType === 'schedule' ? (data.config?.schedule || 'Every Monday 9:00 AM') :
-                 triggerType === 'webhook' ? (data.config?.endpoint || 'POST /webhook/trigger') :
-                 triggerType === 'event' ? (data.config?.event || 'On data change') :
+                {triggerType === 'schedule' ? (config?.schedule || 'Every Monday 9:00 AM') :
+                 triggerType === 'webhook' ? (config?.endpoint || 'POST /webhook/trigger') :
+                 triggerType === 'event' ? (config?.event || 'On data change') :
                  'Manual activation'}
               </span>
             </div>
@@ -202,13 +187,13 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
                       <span className="text-white text-xs">Scheduled</span>
                     </div>
                     <div className="text-xs text-gray-300">
-                      {data.config?.nextRun || 'Next: Today 9:00 AM'}
+                      {config?.nextRun || 'Next: Today 9:00 AM'}
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Frequency</span>
                     <span className="text-xs text-white">
-                      {data.config?.frequency || 'Weekly'}
+                      {config?.frequency || 'Weekly'}
                     </span>
                   </div>
                 </div>
@@ -222,13 +207,13 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
                       <span className="text-white text-xs">Webhook</span>
                     </div>
                     <div className="text-xs text-gray-300">
-                      {data.config?.webhookStatus || 'API Ready'}
+                      {config?.webhookStatus || 'API Ready'}
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Method</span>
                     <span className="text-xs text-white">
-                      {data.config?.method || 'POST'}
+                      {config?.method || 'POST'}
                     </span>
                   </div>
                 </div>
@@ -260,13 +245,13 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
                       <span className="text-white text-xs">Event Listener</span>
                     </div>
                     <div className="text-xs text-gray-300">
-                      {data.config?.listenerStatus || 'Monitoring'}
+                      {config?.listenerStatus || 'Monitoring'}
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Event Type</span>
                     <span className="text-xs text-white">
-                      {data.config?.eventType || 'Data Change'}
+                      {config?.eventType || 'Data Change'}
                     </span>
                   </div>
                 </div>
@@ -319,7 +304,7 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
               <div className="flex items-center justify-center space-x-2 text-red-400">
                 <div className="w-2 h-2 bg-red-400 rounded-full" />
                 <span className="text-xs font-medium">
-                  {data.config?.errorMessage || 'Trigger failed'}
+                  {config?.errorMessage || 'Trigger failed'}
                 </span>
               </div>
             </motion.div>
@@ -342,12 +327,11 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
         )}
       </GlassCard>
 
-      {/* Output Handle - ISSUE #4 FIXED - Using consistent styling */}
+      {/* Output Handle */}
       <Handle
         type="source"
         position={Position.Right}
-        id="output"
-        className="w-3 h-3 bg-emerald-400 border-2 border-white shadow-lg !static"
+        className="w-3 h-3 bg-emerald-400 border-2 border-white shadow-lg"
         style={{ zIndex: 10 }}
       />
 

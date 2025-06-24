@@ -1,31 +1,11 @@
 import React, { memo, useCallback, useState, useEffect } from 'react';
-import { Handle, Position, NodeProps, MarkerType } from '@xyflow/react';
+import { Handle, Position, NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Settings, Mail, Database, Globe, MoreHorizontal, CheckCircle, Clock, AlertCircle, AlertTriangle, BarChart } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
+import type { ActionNodeData } from '../../../types/canvas';
 
-interface ActionNodeData {
-  label: string;
-  description: string;
-  actionType: 'api' | 'email' | 'database' | 'webhook' | 'notification';
-  icon?: React.ComponentType<any>;
-  color: string;
-  config?: Record<string, any>;
-  status: 'pending' | 'executing' | 'completed' | 'error';
-  validation?: {
-    isValid: boolean;
-    errors: string[];
-  };
-  metrics?: {
-    executionCount: number;
-    averageTime: number;
-    lastRun?: string;
-  };
-}
-
-export type ActionNodeProps = NodeProps<ActionNodeData>;
-
-export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
+export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = false }) => {
   // Null check for data
   if (!data) {
     return (
@@ -42,20 +22,17 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
   const [progress, setProgress] = useState(0);
 
   // Validate and set defaults for all data properties to ensure type safety
-  const label = data.label || 'Untitled Action';
-  const description = data.description || 'No description available';
-  const actionType = data.actionType || 'api';
-  
-  // Validate status with proper type checking
-  const validStatuses: ActionNodeData['status'][] = ['pending', 'executing', 'completed', 'error'];
-  const status = validStatuses.includes(data.status) ? data.status : 'pending';
-  
-  const color = data.color || 'from-blue-500 to-purple-600';
-  const validation = data.validation || null;
-  const metrics = data.metrics || null;
-  
-  // Ensure config is properly typed and safe
-  const config = data.config || {};
+  const {
+    label = 'Untitled Action',
+    description = 'No description available',
+    actionType = 'api',
+    status = 'pending',
+    color = 'from-blue-500 to-purple-600',
+    validation = null,
+    metrics = null,
+    config = {},
+    icon: ActionIcon
+  } = data;
 
   // Reactive progress updates for executing status
   useEffect(() => {
@@ -99,12 +76,12 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
     }
   }, []);
 
-  const ActionIcon = data.icon || getActionIcon(data.actionType);
-
   const handleMoreClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setShowMetrics(!showMetrics);
   }, [showMetrics]);
+
+  const IconComponent = ActionIcon || getActionIcon(actionType);
 
   return (
     <motion.div
@@ -144,7 +121,7 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
                   animate={{ rotate: 360 }}
                   transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
                 />
-                {ActionIcon && <ActionIcon className="w-6 h-6 text-white relative z-10" />}
+                <IconComponent className="w-6 h-6 text-white relative z-10" />
               </motion.div>
 
               <div className="flex-1">
@@ -209,13 +186,13 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Recipients</span>
                     <span className="text-xs text-white">
-                      {data.config?.recipients || '3 contacts'}
+                      {config?.recipients || '3 contacts'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Template</span>
                     <span className="text-xs text-white">
-                      {data.config?.template || 'Weekly Report'}
+                      {config?.template || 'Weekly Report'}
                     </span>
                   </div>
                 </div>
@@ -226,13 +203,13 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Operation</span>
                     <span className="text-xs text-white">
-                      {data.config?.operation || 'INSERT'}
+                      {config?.operation || 'INSERT'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Table</span>
                     <span className="text-xs text-white">
-                      {data.config?.table || 'reports'}
+                      {config?.table || 'reports'}
                     </span>
                   </div>
                 </div>
@@ -243,13 +220,13 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Method</span>
                     <span className="text-xs text-white">
-                      {data.config?.method || 'POST'}
+                      {config?.method || 'POST'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Endpoint</span>
                     <span className="text-xs text-white">
-                      {data.config?.endpoint || 'api.example.com'}
+                      {config?.endpoint || 'api.example.com'}
                     </span>
                   </div>
                 </div>
@@ -260,13 +237,13 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Method</span>
                     <span className="text-xs text-white">
-                      {data.config?.method || 'GET'}
+                      {config?.method || 'GET'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">URL</span>
                     <span className="text-xs text-white">
-                      {data.config?.url || 'api.service.com'}
+                      {config?.url || 'api.service.com'}
                     </span>
                   </div>
                 </div>
@@ -291,7 +268,7 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
               </div>
               <div className="flex justify-between text-xs text-gray-400 mt-1">
                 <span>Executing...</span>
-                <span>{data.config?.progress || '60%'}</span>
+                <span>{config?.progress || '60%'}</span>
               </div>
             </motion.div>
           )}
@@ -320,7 +297,7 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
               <div className="flex items-center justify-center space-x-2 text-red-400">
                 <div className="w-2 h-2 bg-red-400 rounded-full" />
                 <span className="text-xs font-medium">
-                  {data.config?.errorMessage || 'Action failed'}
+                  {config?.errorMessage || 'Action failed'}
                 </span>
               </div>
             </motion.div>
@@ -350,6 +327,7 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
               </div>
             </motion.div>
           )}
+
           {/* Validation Errors */}
           {validation && !validation.isValid && validation.errors.length > 0 && (
             <motion.div
@@ -389,8 +367,7 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
       <Handle
         type="source"
         position={Position.Right}
-        id="output"
-        className="w-3 h-3 bg-blue-400 border-2 border-white shadow-lg !static"
+        className="w-3 h-3 bg-blue-400 border-2 border-white shadow-lg"
         style={{ zIndex: 10 }}
       />
     </motion.div>

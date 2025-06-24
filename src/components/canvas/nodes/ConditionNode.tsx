@@ -3,24 +3,31 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { GitBranch, Target, MoreHorizontal, Check, X, AlertCircle } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
+import type { ConditionNodeData } from '../../../types/canvas';
 
-interface ConditionNodeData {
-  label: string;
-  description: string;
-  conditionType: 'if' | 'switch' | 'filter' | 'gate';
-  condition: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  color: string;
-  status: 'ready' | 'evaluating' | 'true' | 'false' | 'error';
-}
-
-export type ConditionNodeProps = NodeProps<ConditionNodeData>;
-
-export const ConditionNode = memo<ConditionNodeProps>(({ data, selected }) => {
+export const ConditionNode = memo<NodeProps<ConditionNodeData>>(({ data, selected = false }) => {
   // Null check for data
   if (!data) {
-    return null;
+    return (
+      <GlassCard variant="medium" className="w-72 border-2 border-red-400">
+        <div className="p-4 text-center">
+          <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+          <p className="text-red-300">Invalid Condition Node</p>
+        </div>
+      </GlassCard>
+    );
   }
+
+  // Ensure required fields exist with defaults
+  const {
+    label = 'Untitled Condition',
+    description = 'No description available',
+    conditionType = 'if',
+    condition = 'value > threshold',
+    status = 'ready',
+    color = 'from-orange-500 to-red-600',
+    icon: IconComponent = GitBranch
+  } = data;
 
   const getStatusColor = useCallback((status: string) => {
     switch (status) {
@@ -48,15 +55,6 @@ export const ConditionNode = memo<ConditionNodeProps>(({ data, selected }) => {
     e.stopPropagation();
     // Add your more actions logic here
   }, []);
-
-  // Ensure required fields exist with defaults
-  const label = data.label || 'Untitled Condition';
-  const description = data.description || 'No description available';
-  const conditionType = data.conditionType || 'if';
-  const condition = data.condition || 'value > threshold';
-  const status = data.status || 'ready';
-  const color = data.color || 'from-orange-500 to-red-600';
-  const IconComponent = data.icon || GitBranch;
 
   return (
     <motion.div
@@ -274,7 +272,7 @@ export const ConditionNode = memo<ConditionNodeProps>(({ data, selected }) => {
         type="source"
         position={Position.Right}
         id="true"
-        className="w-3 h-3 bg-green-400 border-2 border-white shadow-lg !static"
+        className="w-3 h-3 bg-green-400 border-2 border-white shadow-lg"
         style={{ 
           right: -6, 
           top: '35%',
@@ -285,7 +283,7 @@ export const ConditionNode = memo<ConditionNodeProps>(({ data, selected }) => {
         type="source"
         position={Position.Right}
         id="false"
-        className="w-3 h-3 bg-red-400 border-2 border-white shadow-lg !static"
+        className="w-3 h-3 bg-red-400 border-2 border-white shadow-lg"
         style={{ 
           right: -6, 
           top: '65%',

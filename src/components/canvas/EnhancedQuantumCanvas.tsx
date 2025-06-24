@@ -62,7 +62,6 @@ import {
   Zap
 } from 'lucide-react';
 import type { NodeTypes } from '@xyflow/react';
-import type { NodeProps } from '@xyflow/react';
 import { AgentNode as AgentNodeComponent } from './nodes/AgentNode';
 import { TriggerNode as TriggerNodeComponent } from './nodes/TriggerNode';
 import { ActionNode as ActionNodeComponent } from './nodes/ActionNode';
@@ -72,112 +71,21 @@ import { GlassCard } from '../ui/GlassCard';
 import { HolographicButton } from '../ui/HolographicButton';
 import { useCanvasStore } from '../../stores/canvasStore';
 import type { Blueprint } from '../../types';
+import type { 
+  AgentNodeData, 
+  TriggerNodeData, 
+  ActionNodeData, 
+  ConditionNodeData, 
+  DelayNodeData 
+} from '../../types/canvas';
 
-// Define custom data interfaces for each node type
-interface AgentNodeData {
-  label: string;
-  role: string;
-  description: string;
-  tools: string[];
-  personality?: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  color: string;
-  status: 'ready' | 'executing' | 'paused' | 'error' | 'completed';
-  performance?: {
-    averageResponseTime: number;
-    successRate: number;
-    lastExecution?: string;
-  };
-  metadata?: Record<string, any>;
-}
-
-interface TriggerNodeData {
-  label: string;
-  triggerType: 'manual' | 'schedule' | 'webhook' | 'event';
-  description: string;
-  icon?: React.ComponentType<any>;
-  color: string;
-  config?: Record<string, any>;
-  status: 'ready' | 'active' | 'triggered' | 'error';
-  schedule?: {
-    frequency?: string;
-    nextRun?: string;
-    timezone?: string;
-  };
-  webhook?: {
-    url?: string;
-    method?: string;
-    headers?: Record<string, string>;
-  };
-}
-
-interface ActionNodeData {
-  label: string;
-  description: string;
-  actionType: 'api' | 'email' | 'database' | 'webhook' | 'notification';
-  icon?: React.ComponentType<any>;
-  color: string;
-  config?: Record<string, any>;
-  status: 'pending' | 'executing' | 'completed' | 'error';
-  validation?: {
-    isValid: boolean;
-    errors: string[];
-  };
-  metrics?: {
-    executionCount: number;
-    averageTime: number;
-    lastRun?: string;
-  };
-}
-
-interface ConditionNodeData {
-  label: string;
-  description: string;
-  conditionType: 'if' | 'switch' | 'filter' | 'gate';
-  condition: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  color: string;
-  status: 'ready' | 'evaluating' | 'true' | 'false' | 'error';
-}
-
-interface DelayNodeData {
-  label: string;
-  description: string;
-  delayType: 'fixed' | 'dynamic' | 'conditional';
-  duration: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  color: string;
-  status: 'ready' | 'waiting' | 'paused' | 'completed' | 'error';
-}
-
-// Create wrapper components that properly implement NodeProps<T>
-const AgentNodeWrapper: React.FC<NodeProps<AgentNodeData>> = (props) => {
-  return <AgentNodeComponent {...props} />;
-};
-
-const TriggerNodeWrapper: React.FC<NodeProps<TriggerNodeData>> = (props) => {
-  return <TriggerNodeComponent {...props} />;
-};
-
-const ActionNodeWrapper: React.FC<NodeProps<ActionNodeData>> = (props) => {
-  return <ActionNodeComponent {...props} />;
-};
-
-const ConditionNodeWrapper: React.FC<NodeProps<ConditionNodeData>> = (props) => {
-  return <ConditionNodeComponent {...props} />;
-};
-
-const DelayNodeWrapper: React.FC<NodeProps<DelayNodeData>> = (props) => {
-  return <DelayNodeComponent {...props} />;
-};
-
-// Define node types with proper typing using wrapper components
+// Define node types with proper typing
 const nodeTypes: NodeTypes = {
-  agent: AgentNodeWrapper,
-  trigger: TriggerNodeWrapper,
-  action: ActionNodeWrapper,
-  condition: ConditionNodeWrapper,
-  delay: DelayNodeWrapper,
+  agent: AgentNodeComponent,
+  trigger: TriggerNodeComponent,
+  action: ActionNodeComponent,
+  condition: ConditionNodeComponent,
+  delay: DelayNodeComponent,
 };
 
 const proOptions = {
@@ -473,13 +381,6 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Initialize canvas from blueprint with enhanced layout
-  // useEffect(() => {
-  //   if (blueprint && blueprint.suggested_structure) {
-  //     generateEnhancedNodesFromBlueprint(blueprint);
-  //   }
-  // }, [blueprint, addToHistory]);
-
   const generateEnhancedNodesFromBlueprint = useCallback((blueprint: Blueprint) => {
     if (!blueprint) return;
 
@@ -493,12 +394,12 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
       position: { x: 50, y: 200 },
       data: {
         label: 'Guild Activation',
-        triggerType: 'manual',
+        triggerType: 'manual' as const,
         description: 'Initiates the guild workflow with intelligent coordination',
         icon: Rocket,
         color: 'from-emerald-500 to-teal-500',
-        status: 'ready'
-      },
+        status: 'ready' as const
+      } satisfies TriggerNodeData,
     });
 
     // Create agent nodes with smart layout algorithm
@@ -508,7 +409,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
       const centerX = 500;
       const centerY = 300;
       
-      const agentNode: Node = {
+      const agentNode: Node<AgentNodeData> = {
         id: `agent-${index + 1}`,
         type: 'agent',
         position: { 
@@ -523,8 +424,8 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           personality: getAgentPersonality(agent.role),
           icon: getAgentIcon(agent.role),
           color: getAgentColor(index),
-          status: 'ready'
-        },
+          status: 'ready' as const
+        } satisfies AgentNodeData,
       };
       newNodes.push(agentNode);
 
@@ -561,7 +462,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
 
     // Create workflow action nodes with enhanced layout
     blueprint.suggested_structure.workflows.forEach((workflow, index) => {
-      const workflowNode: Node = {
+      const workflowNode: Node<ActionNodeData> = {
         id: `workflow-${index + 1}`,
         type: 'action',
         position: { 
@@ -574,8 +475,8 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           actionType: mapTriggerTypeToActionType(workflow.trigger_type),
           icon: getWorkflowIcon(workflow.trigger_type),
           color: getWorkflowColor(workflow.trigger_type),
-          status: 'pending'
-        },
+          status: 'pending' as const
+        } satisfies ActionNodeData,
       };
       newNodes.push(workflowNode);
 
@@ -677,7 +578,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
   };
 
   const mapTriggerTypeToActionType = (triggerType: string) => {
-    const mapping: Record<string, string> = {
+    const mapping: Record<string, ActionNodeData['actionType']> = {
       'schedule': 'database',
       'webhook': 'api',
       'manual': 'notification',
@@ -770,21 +671,105 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
     const nodeTemplate = nodeCreationTools.find(tool => tool.type === type);
     if (!nodeTemplate) return;
 
-    const newNode: Node = {
-      id: `${type}-${Date.now()}`,
-      type,
-      position: position || { 
-        x: Math.random() * 400 + 200, 
-        y: Math.random() * 400 + 200 
-      },
-      data: {
-        label: `New ${nodeTemplate.label}`,
-        description: nodeTemplate.description,
-        icon: nodeTemplate.icon,
-        color: nodeTemplate.color,
-        status: 'new'
-      },
-    };
+    let newNode: Node;
+
+    switch (type) {
+      case 'agent':
+        newNode = {
+          id: `${type}-${Date.now()}`,
+          type,
+          position: position || { 
+            x: Math.random() * 400 + 200, 
+            y: Math.random() * 400 + 200 
+          },
+          data: {
+            label: `New ${nodeTemplate.label}`,
+            description: nodeTemplate.description,
+            role: 'AI Assistant',
+            tools: ['API', 'Database'],
+            icon: nodeTemplate.icon,
+            color: nodeTemplate.color,
+            status: 'ready'
+          } satisfies AgentNodeData,
+        } satisfies Node<AgentNodeData>;
+        break;
+      case 'trigger':
+        newNode = {
+          id: `${type}-${Date.now()}`,
+          type,
+          position: position || { 
+            x: Math.random() * 400 + 200, 
+            y: Math.random() * 400 + 200 
+          },
+          data: {
+            label: `New ${nodeTemplate.label}`,
+            description: nodeTemplate.description,
+            triggerType: 'manual',
+            icon: nodeTemplate.icon,
+            color: nodeTemplate.color,
+            status: 'ready'
+          } satisfies TriggerNodeData,
+        } satisfies Node<TriggerNodeData>;
+        break;
+      case 'action':
+        newNode = {
+          id: `${type}-${Date.now()}`,
+          type,
+          position: position || { 
+            x: Math.random() * 400 + 200, 
+            y: Math.random() * 400 + 200 
+          },
+          data: {
+            label: `New ${nodeTemplate.label}`,
+            description: nodeTemplate.description,
+            actionType: 'api',
+            icon: nodeTemplate.icon,
+            color: nodeTemplate.color,
+            status: 'pending'
+          } satisfies ActionNodeData,
+        } satisfies Node<ActionNodeData>;
+        break;
+      case 'condition':
+        newNode = {
+          id: `${type}-${Date.now()}`,
+          type,
+          position: position || { 
+            x: Math.random() * 400 + 200, 
+            y: Math.random() * 400 + 200 
+          },
+          data: {
+            label: `New ${nodeTemplate.label}`,
+            description: nodeTemplate.description,
+            conditionType: 'if',
+            condition: 'value > threshold',
+            icon: nodeTemplate.icon,
+            color: nodeTemplate.color,
+            status: 'ready'
+          } satisfies ConditionNodeData,
+        } satisfies Node<ConditionNodeData>;
+        break;
+      case 'delay':
+        newNode = {
+          id: `${type}-${Date.now()}`,
+          type,
+          position: position || { 
+            x: Math.random() * 400 + 200, 
+            y: Math.random() * 400 + 200 
+          },
+          data: {
+            label: `New ${nodeTemplate.label}`,
+            description: nodeTemplate.description,
+            delayType: 'fixed',
+            duration: '5s',
+            icon: nodeTemplate.icon,
+            color: nodeTemplate.color,
+            status: 'ready'
+          } satisfies DelayNodeData,
+        } satisfies Node<DelayNodeData>;
+        break;
+      default:
+        return;
+    }
 
     const newNodes = [...nodes, newNode];
     setNodes([...newNodes]);
@@ -826,8 +811,9 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
               {/* Logo & Info */}
               <div className="flex items-center space-x-3">
                 <motion.div 
-                  className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center"
+                  className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center"
                   whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 400 }}
                 >
                   <Workflow className="w-5 h-5 text-white" />
                 </motion.div>

@@ -3,28 +3,10 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Bot, Settings, Play, Pause, MoreHorizontal, Zap, Brain, CheckCircle, AlertCircle, Clock, BarChart } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
+import type { AgentNodeData } from '../../../types/canvas';
 
-interface AgentNodeData {
-  label: string;
-  role: string;
-  description: string;
-  tools: string[];
-  personality?: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  color: string;
-  status: 'ready' | 'executing' | 'paused' | 'error' | 'completed';
-  performance?: {
-    averageResponseTime: number;
-    successRate: number;
-    lastExecution?: string;
-  };
-  metadata?: Record<string, any>;
-}
-
-export type AgentNodeProps = NodeProps<AgentNodeData>;
-
-export const AgentNode = memo<AgentNodeProps>(({ data, selected }) => {
-  // Null check for data
+export const AgentNode = memo<NodeProps<AgentNodeData>>(({ data, selected = false }) => {
+  // Null check for data with proper typing
   if (!data) {
     return (
       <GlassCard variant="medium" className="w-80 border-2 border-red-400">
@@ -39,11 +21,23 @@ export const AgentNode = memo<AgentNodeProps>(({ data, selected }) => {
   const [progress, setProgress] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Ensure all required properties exist with defaults
+  const {
+    label = 'Untitled Agent',
+    role = 'AI Assistant',
+    description = 'No description available',
+    tools = [],
+    status = 'ready',
+    color = 'from-purple-500 to-blue-600',
+    icon: IconComponent = Bot,
+    performance
+  } = data;
+
   // Simulate progress when executing
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    if (data.status === 'executing') {
+    if (status === 'executing') {
       interval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 100) {
@@ -61,7 +55,7 @@ export const AgentNode = memo<AgentNodeProps>(({ data, selected }) => {
         clearInterval(interval);
       }
     };
-  }, [data.status]);
+  }, [status]);
 
   const getStatusColor = useCallback((status: string) => {
     switch (status) {
@@ -89,16 +83,6 @@ export const AgentNode = memo<AgentNodeProps>(({ data, selected }) => {
     e.stopPropagation();
     // Add your more actions logic here
   }, []);
-
-  // Ensure required fields exist with defaults
-  const label = data.label || 'Untitled Agent';
-  const role = data.role || 'AI Assistant';
-  const description = data.description || 'No description available';
-  const tools = data.tools || [];
-  const status = data.status || 'ready';
-  const color = data.color || 'from-purple-500 to-blue-600';
-  const IconComponent = data.icon || Bot;
-  const performance = data.performance;
 
   return (
     <motion.div
@@ -255,6 +239,8 @@ export const AgentNode = memo<AgentNodeProps>(({ data, selected }) => {
               </div>
             </motion.div>
           )}
+
+          {/* Performance Metrics */}
           {performance && (isHovered || selected) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -337,8 +323,7 @@ export const AgentNode = memo<AgentNodeProps>(({ data, selected }) => {
       <Handle
         type="source"
         position={Position.Right}
-        id="output"
-        className="w-3 h-3 bg-purple-400 border-2 border-white shadow-lg !static"
+        className="w-3 h-3 bg-purple-400 border-2 border-white shadow-lg"
         style={{ zIndex: 10 }}
       />
 

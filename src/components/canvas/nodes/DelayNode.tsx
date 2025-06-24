@@ -3,35 +3,42 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Clock, Timer, MoreHorizontal, Pause, CheckCircle, Settings, Play } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
+import type { DelayNodeData } from '../../../types/canvas';
 
-interface DelayNodeData {
-  label: string;
-  description: string;
-  delayType: 'fixed' | 'dynamic' | 'conditional';
-  duration: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  color: string;
-  status: 'ready' | 'waiting' | 'paused' | 'completed' | 'error';
-}
-
-export type DelayNodeProps = NodeProps<DelayNodeData>;
-
-export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
+export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = false }) => {
   // Null check for data
   if (!data) {
-    return null;
+    return (
+      <GlassCard variant="medium" className="w-64 border-2 border-red-400">
+        <div className="p-4 text-center">
+          <Clock className="w-8 h-8 text-red-400 mx-auto mb-2" />
+          <p className="text-red-300">Invalid Delay Node</p>
+        </div>
+      </GlassCard>
+    );
   }
 
   const [progress, setProgress] = useState(0);
   const [remainingTime, setRemainingTime] = useState('');
 
+  // Ensure required fields exist with defaults
+  const {
+    label = 'Untitled Delay',
+    description = 'No description available',
+    delayType = 'fixed',
+    duration = '5s',
+    status = 'ready',
+    color = 'from-violet-500 to-purple-600',
+    icon: IconComponent = Clock
+  } = data;
+
   // Calculate remaining time and progress when waiting
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    if (data.status === 'waiting') {
+    if (status === 'waiting') {
       // Parse duration string (e.g., "5s", "2m", "1h")
-      const durationMatch = data.duration.match(/(\d+)([smh])/);
+      const durationMatch = duration.match(/(\d+)([smh])/);
       if (durationMatch) {
         const value = parseInt(durationMatch[1]);
         const unit = durationMatch[2];
@@ -71,7 +78,7 @@ export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
         clearInterval(interval);
       }
     };
-  }, [data.status, data.duration]);
+  }, [status, duration]);
 
   const getStatusColor = useCallback((status: string) => {
     switch (status) {
@@ -99,15 +106,6 @@ export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
     e.stopPropagation();
     // Add your more actions logic here
   }, []);
-
-  // Ensure required fields exist with defaults
-  const label = data.label || 'Untitled Delay';
-  const description = data.description || 'No description available';
-  const delayType = data.delayType || 'fixed';
-  const duration = data.duration || '5s';
-  const status = data.status || 'ready';
-  const color = data.color || 'from-violet-500 to-purple-600';
-  const IconComponent = data.icon || Clock;
 
   return (
     <motion.div
@@ -346,8 +344,7 @@ export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
       <Handle
         type="source"
         position={Position.Right}
-        id="output"
-        className="w-3 h-3 bg-violet-400 border-2 border-white shadow-lg !static"
+        className="w-3 h-3 bg-violet-400 border-2 border-white shadow-lg"
       />
     </motion.div>
   );
