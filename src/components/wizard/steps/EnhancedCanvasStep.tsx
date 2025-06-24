@@ -310,14 +310,6 @@ export const EnhancedCanvasStep: React.FC = () => {
     setWorkflowEdges(newEdges);
     setCanvasInitialized(true);
     
-  }, [setWorkflowNodes, setWorkflowEdges]);
-  
-  // Initialize canvas when blueprint is loaded
-  useEffect(() => {
-    if (blueprint && !canvasInitialized) {
-      generateCanvasFromBlueprint(blueprint);
-    }
-  }, [blueprint, canvasInitialized, generateCanvasFromBlueprint]);
   const handleSaveCanvas = (nodes: any[], edges: any[]) => {
     console.log('💾 Enhanced Canvas saved:', { 
       nodes: nodes.length, 

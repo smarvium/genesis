@@ -38,6 +38,7 @@
     "redis": "^4.6.12",
     "tailwind-merge": "^2.2.0",
     "use-sound": "^4.0.1",
+    "uuid": "^9.0.1",
     "zustand": "^4.4.7"
   },
   "devDependencies": {

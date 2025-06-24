@@ -17,17 +17,23 @@ export const DeploymentStep: React.FC = () => {
   } = useWizardStore();
 
   useEffect(() => {
-    // Auto-deploy if we have simulation results but no deployment ID
-    if (simulationResults && !deploymentId && !isLoading) {
-      const result = await deployGuild();
-      if (result.error) {
-        setErrors({ submit: result.error.message });
-      } else {
-        // Deployment initiated successfully
+    const deployAsync = async () => {
+      try {
+        // Auto-deploy if we have simulation results but no deployment ID
+        if (simulationResults && !deploymentId && !isLoading) {
+          const result = await deployGuild();
+          if (result.error) {
+            setErrors({ submit: result.error.message });
+          } else {
+            // Deployment initiated successfully
+          }
+        }
+      } catch (error: any) {
+        setErrors({ submit: error.message || 'An unexpected error occurred' });
       }
-    } catch (error: any) {
-      setErrors({ submit: error.message || 'An unexpected error occurred' });
-    }
+    };
+    
+    deployAsync();
   }, [simulationResults, deploymentId, isLoading, deployGuild]);
 
   // Handle successful deployment
