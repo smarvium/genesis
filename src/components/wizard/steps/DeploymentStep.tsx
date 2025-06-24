@@ -19,11 +19,16 @@ export const DeploymentStep: React.FC = () => {
   useEffect(() => {
     const deployAsync = async () => {
       try {
-        // Auto-deploy if we have simulation results but no deployment ID
-        if (simulationResults && !deploymentId && !isLoading) {
+      const deployGuildAsync = async () => {
+        try {
           const result = await deployGuild();
           if (result.error) {
             setErrors([result.error.message]);
+          }
+          // Deployment initiated successfully
+        } catch (error: any) {
+          setErrors([error.message || 'An unexpected error occurred']);
+        }
           } else {
             // Deployment initiated successfully
           }
@@ -31,8 +36,7 @@ export const DeploymentStep: React.FC = () => {
       } catch (error: any) {
         setErrors([error.message || 'An unexpected error occurred']);
       }
-    };
-    
+      deployGuildAsync();
     deployAsync();
   }, [simulationResults, deploymentId, isLoading, deployGuild]);
 

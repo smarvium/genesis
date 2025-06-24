@@ -20,6 +20,19 @@ export const SimulationStep: React.FC = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [showLabView, setShowLabView] = useState(false);
   const [selectedModel, setSelectedModel] = useState('gemini-flash');
+  const [simulationSettings, setSimulationSettings] = useState({
+    llmChoice: 'gemini_flash',
+    simulationType: 'comprehensive',
+    simulationDuration: 120,
+    voiceEnabled: false
+  });
+
+  const handleSettingChange = (setting: string, value: any) => {
+    setSimulationSettings(prev => ({
+      ...prev,
+      [setting]: value
+    }));
+  };
 
   const handleRunSimulation = async () => {
     // We'll pass the simulation settings to the runSimulation function

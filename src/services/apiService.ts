@@ -1,5 +1,4 @@
 import axios, { AxiosRequestConfig, Method } from 'axios';
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Service for executing API requests and managing API credentials
@@ -19,7 +18,7 @@ export const apiService = {
   ) => {
     try {
       // Create a unique request ID for tracking
-      const requestId = uuidv4();
+      const requestId = crypto.randomUUID();
       console.log(`🚀 Executing API request ${requestId}: ${config.method} ${config.url}`);
       
       // Prepare headers with credentials if provided

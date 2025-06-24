@@ -310,7 +310,7 @@ export const EnhancedCanvasStep: React.FC = () => {
     setWorkflowEdges(newEdges);
     setCanvasInitialized(true);
     
-  }, [setWorkflowNodes, setWorkflowEdges]);
+  }, [setWorkflowNodes, setWorkflowEdges, blueprint]);
   
   // Initialize canvas when blueprint is loaded
   useEffect(() => {
