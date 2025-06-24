@@ -24,7 +24,7 @@ interface TriggerNodeData {
   };
 }
 
-type TriggerNodeProps = NodeProps<TriggerNodeData>;
+export type TriggerNodeProps = NodeProps<TriggerNodeData>;
 
 export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
   // Null check for data - ISSUE #1 FIXED
@@ -346,7 +346,8 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected }) => {
       <Handle
         type="source"
         position={Position.Right}
-        className="w-3 h-3 bg-emerald-400 border-2 border-white shadow-lg"
+        id="output"
+        className="w-3 h-3 bg-emerald-400 border-2 border-white shadow-lg !static"
         style={{ zIndex: 10 }}
       />
 

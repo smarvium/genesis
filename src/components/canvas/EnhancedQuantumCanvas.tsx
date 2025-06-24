@@ -15,6 +15,7 @@ import {
   ReactFlowProvider,
   useReactFlow,
   BackgroundVariant,
+  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
@@ -65,6 +66,9 @@ import type { NodeTypes } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
 import { AgentNode as AgentNodeComponent } from './nodes/AgentNode';
 import { TriggerNode as TriggerNodeComponent } from './nodes/TriggerNode';
+import { ActionNode as ActionNodeComponent } from './nodes/ActionNode';
+import { ConditionNode as ConditionNodeComponent } from './nodes/ConditionNode';
+import { DelayNode as DelayNodeComponent } from './nodes/DelayNode';
 import { ActionNode as ActionNodeComponent } from './nodes/ActionNode';
 import { ConditionNode as ConditionNodeComponent } from './nodes/ConditionNode';
 import { DelayNode as DelayNodeComponent } from './nodes/DelayNode';

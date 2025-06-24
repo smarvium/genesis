@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useState } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import React, { memo, useCallback, useState, useEffect } from 'react';
+import { Handle, Position, NodeProps, MarkerType } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Settings, Mail, Database, Globe, MoreHorizontal, CheckCircle, Clock, AlertCircle, AlertTriangle, BarChart } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
@@ -23,7 +24,7 @@ interface ActionNodeData {
   };
 }
 
-type ActionNodeProps = NodeProps<ActionNodeData>;
+export type ActionNodeProps = NodeProps<ActionNodeData>;
 
 export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
   // Null check for data
@@ -389,7 +390,8 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
       <Handle
         type="source"
         position={Position.Right}
-        className="w-3 h-3 bg-blue-400 border-2 border-white shadow-lg"
+        id="output"
+        className="w-3 h-3 bg-blue-400 border-2 border-white shadow-lg !static"
         style={{ zIndex: 10 }}
       />
     </motion.div>

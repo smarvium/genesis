@@ -21,7 +21,7 @@ interface AgentNodeData {
   metadata?: Record<string, any>;
 }
 
-type AgentNodeProps = NodeProps<AgentNodeData>;
+export type AgentNodeProps = NodeProps<AgentNodeData>;
 
 export const AgentNode = memo<AgentNodeProps>(({ data, selected }) => {
   // Null check for data
@@ -337,7 +337,8 @@ export const AgentNode = memo<AgentNodeProps>(({ data, selected }) => {
       <Handle
         type="source"
         position={Position.Right}
-        className="w-3 h-3 bg-purple-400 border-2 border-white shadow-lg"
+        id="output"
+        className="w-3 h-3 bg-purple-400 border-2 border-white shadow-lg !static"
         style={{ zIndex: 10 }}
       />
 

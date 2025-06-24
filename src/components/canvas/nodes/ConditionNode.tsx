@@ -14,7 +14,7 @@ interface ConditionNodeData {
   status: 'ready' | 'evaluating' | 'true' | 'false' | 'error';
 }
 
-type ConditionNodeProps = NodeProps<ConditionNodeData>;
+export type ConditionNodeProps = NodeProps<ConditionNodeData>;
 
 export const ConditionNode = memo<ConditionNodeProps>(({ data, selected }) => {
   // Null check for data
@@ -274,7 +274,7 @@ export const ConditionNode = memo<ConditionNodeProps>(({ data, selected }) => {
         type="source"
         position={Position.Right}
         id="true"
-        className="w-3 h-3 bg-green-400 border-2 border-white shadow-lg"
+        className="w-3 h-3 bg-green-400 border-2 border-white shadow-lg !static"
         style={{ 
           right: -6, 
           top: '35%',
@@ -285,7 +285,7 @@ export const ConditionNode = memo<ConditionNodeProps>(({ data, selected }) => {
         type="source"
         position={Position.Right}
         id="false"
-        className="w-3 h-3 bg-red-400 border-2 border-white shadow-lg"
+        className="w-3 h-3 bg-red-400 border-2 border-white shadow-lg !static"
         style={{ 
           right: -6, 
           top: '65%',

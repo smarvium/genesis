@@ -14,7 +14,7 @@ interface DelayNodeData {
   status: 'ready' | 'waiting' | 'paused' | 'completed' | 'error';
 }
 
-type DelayNodeProps = NodeProps<DelayNodeData>;
+export type DelayNodeProps = NodeProps<DelayNodeData>;
 
 export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
   // Null check for data
@@ -346,7 +346,8 @@ export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
       <Handle
         type="source"
         position={Position.Right}
-        className="w-3 h-3 bg-violet-400 border-2 border-white shadow-lg"
+        id="output"
+        className="w-3 h-3 bg-violet-400 border-2 border-white shadow-lg !static"
       />
     </motion.div>
   );
