@@ -1,7 +1,7 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState, useEffect } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { motion } from 'framer-motion';
-import { Play, Calendar, Globe, Zap, MoreHorizontal } from 'lucide-react';
+import { Play, Calendar, Globe, Zap, MoreHorizontal, AlertCircle, AlertTriangle } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
 
 interface TriggerNodeData {
@@ -114,7 +114,6 @@ export const TriggerNode = memo<TriggerNodeProps>(({ data, selected = false }) =
         className={`w-72 border-2 ${getStatusColor(status)} ${
           selected ? 'ring-2 ring-emerald-400/50' : ''
         } ${!isValidated ? 'border-yellow-400/50' : ''} transition-all duration-200`}
-        } transition-all duration-200`}
       >
         <div className="p-4">
           {/* Header */}

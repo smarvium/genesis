@@ -1,7 +1,7 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { motion } from 'framer-motion';
-import { Settings, Mail, Database, Globe, MoreHorizontal, CheckCircle, Clock } from 'lucide-react';
+import { Settings, Mail, Database, Globe, MoreHorizontal, CheckCircle, Clock, AlertCircle, AlertTriangle, BarChart } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
 
 interface ActionNodeData {
@@ -98,7 +98,6 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => 
         className={`w-72 border-2 ${getStatusColor(status)} ${
           selected ? 'ring-2 ring-blue-400/50' : ''
         } ${validation && !validation.isValid ? 'border-yellow-400/50' : ''} transition-all duration-200`}
-        } transition-all duration-200`}
       >
         <div className="p-4">
           {/* Header */}
