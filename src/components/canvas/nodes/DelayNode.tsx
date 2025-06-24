@@ -1,7 +1,7 @@
-import React, { memo } from 'react';
-import { Handle, Position, NodeProps, Node } from '@xyflow/react';
+import React, { memo, useState, useEffect, useCallback } from 'react';
+import { Handle, Position, NodeProps } from 'reactflow';
 import { motion } from 'framer-motion';
-import { Clock, Timer, MoreHorizontal, Pause } from 'lucide-react';
+import { Clock, Timer, MoreHorizontal, Pause, CheckCircle, Settings, Play } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
 
 interface DelayNodeData {
@@ -9,24 +9,105 @@ interface DelayNodeData {
   description: string;
   delayType: 'fixed' | 'dynamic' | 'conditional';
   duration: string;
-  icon: React.ComponentType<any>;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   color: string;
-  status: 'ready' | 'waiting' | 'paused' | 'completed';
+  status: 'ready' | 'waiting' | 'paused' | 'completed' | 'error';
 }
 
-// Create a type that extends NodeProps but with required width/height
 type DelayNodeProps = NodeProps<DelayNodeData>;
 
-export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
-  const getStatusColor = (status: string) => {
+export const DelayNode = memo<DelayNodeProps>(({ data, selected = false }) => {
+  // Null check for data
+  if (!data) {
+    return null;
+  }
+
+  const [progress, setProgress] = useState(0);
+  const [remainingTime, setRemainingTime] = useState('');
+
+  // Calculate remaining time and progress when waiting
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (data.status === 'waiting') {
+      // Parse duration string (e.g., "5s", "2m", "1h")
+      const durationMatch = data.duration.match(/(\d+)([smh])/);
+      if (durationMatch) {
+        const value = parseInt(durationMatch[1]);
+        const unit = durationMatch[2];
+        
+        let totalSeconds = 0;
+        switch (unit) {
+          case 's': totalSeconds = value; break;
+          case 'm': totalSeconds = value * 60; break;
+          case 'h': totalSeconds = value * 3600; break;
+        }
+
+        let elapsedSeconds = 0;
+        interval = setInterval(() => {
+          elapsedSeconds++;
+          const progressPercent = (elapsedSeconds / totalSeconds) * 100;
+          setProgress(Math.min(progressPercent, 100));
+
+          const remaining = Math.max(totalSeconds - elapsedSeconds, 0);
+          const minutes = Math.floor(remaining / 60);
+          const seconds = remaining % 60;
+          setRemainingTime(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+
+          if (elapsedSeconds >= totalSeconds) {
+            clearInterval(interval);
+            setProgress(100);
+            setRemainingTime('0:00');
+          }
+        }, 1000);
+      }
+    } else {
+      setProgress(0);
+      setRemainingTime('');
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [data.status, data.duration]);
+
+  const getStatusColor = useCallback((status: string) => {
     switch (status) {
       case 'ready': return 'border-violet-400 shadow-violet-400/30';
       case 'waiting': return 'border-yellow-400 shadow-yellow-400/30 animate-pulse';
       case 'paused': return 'border-gray-400 shadow-gray-400/30';
       case 'completed': return 'border-green-400 shadow-green-400/30';
+      case 'error': return 'border-red-400 shadow-red-400/30';
       default: return 'border-gray-400 shadow-gray-400/30';
     }
-  };
+  }, []);
+
+  const getStatusIcon = useCallback((status: string) => {
+    switch (status) {
+      case 'waiting': return <Timer className="w-3 h-3 text-yellow-400" />;
+      case 'paused': return <Pause className="w-3 h-3 text-gray-400" />;
+      case 'completed': return <CheckCircle className="w-3 h-3 text-green-400" />;
+      case 'ready': return <div className="w-2 h-2 bg-violet-400 rounded-full" />;
+      case 'error': return <div className="w-2 h-2 bg-red-400 rounded-full" />;
+      default: return <div className="w-2 h-2 bg-gray-400 rounded-full" />;
+    }
+  }, []);
+
+  const handleMoreClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Add your more actions logic here
+  }, []);
+
+  // Ensure required fields exist with defaults
+  const label = data.label || 'Untitled Delay';
+  const description = data.description || 'No description available';
+  const delayType = data.delayType || 'fixed';
+  const duration = data.duration || '5s';
+  const status = data.status || 'ready';
+  const color = data.color || 'from-violet-500 to-purple-600';
+  const IconComponent = data.icon || Clock;
 
   return (
     <motion.div
@@ -46,7 +127,7 @@ export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
       {/* Main Node */}
       <GlassCard 
         variant="medium" 
-        className={`w-64 border-2 ${getStatusColor(data.status)} ${
+        className={`w-64 border-2 ${getStatusColor(status)} ${
           selected ? 'ring-2 ring-violet-400/50' : ''
         } transition-all duration-200`}
       >
@@ -55,42 +136,45 @@ export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center space-x-3">
               <motion.div 
-                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${data.color} flex items-center justify-center relative overflow-hidden`}
+                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center relative overflow-hidden`}
                 whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 400 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
               >
-                {/* Animated background */}
+                {/* Animated background - only animate when waiting */}
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  animate={{ rotate: status === 'waiting' ? 360 : 0 }}
+                  transition={{ 
+                    duration: 6, 
+                    repeat: status === 'waiting' ? Infinity : 0, 
+                    ease: "linear" 
+                  }}
                 />
-                <Clock className="w-6 h-6 text-white relative z-10" />
+                <IconComponent className="w-6 h-6 text-white relative z-10" />
               </motion.div>
 
               <div className="flex-1">
                 <h3 className="text-white font-semibold text-sm leading-tight">
-                  {data.label}
+                  {label}
                 </h3>
                 <p className="text-violet-300 text-xs">
-                  {data.duration}
+                  {duration}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center space-x-1">
               <div className="flex items-center space-x-1 px-2 py-1 bg-white/10 rounded-full">
-                {data.status === 'waiting' && <Timer className="w-3 h-3 text-yellow-400" />}
-                {data.status === 'paused' && <Pause className="w-3 h-3 text-gray-400" />}
-                {data.status === 'completed' && <div className="w-2 h-2 bg-green-400 rounded-full" />}
-                {data.status === 'ready' && <div className="w-2 h-2 bg-violet-400 rounded-full" />}
-                <span className="text-xs text-white capitalize">{data.status}</span>
+                {getStatusIcon(status)}
+                <span className="text-xs text-white capitalize">{status}</span>
               </div>
               
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
+                onClick={handleMoreClick}
                 className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                aria-label="More options"
               >
                 <MoreHorizontal className="w-3 h-3 text-white" />
               </motion.button>
@@ -99,7 +183,7 @@ export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
 
           {/* Description */}
           <p className="text-gray-300 text-xs mb-3 leading-relaxed">
-            {data.description}
+            {description}
           </p>
 
           {/* Delay Configuration */}
@@ -107,29 +191,28 @@ export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
             <div className="flex items-center justify-between">
               <span className="text-gray-400 text-xs font-medium">Delay Type</span>
               <span className="text-violet-400 text-xs capitalize">
-                {data.delayType}
+                {delayType}
               </span>
             </div>
 
             <div className="bg-white/5 rounded-lg p-3 border border-white/10">
               <div className="flex items-center justify-center space-x-2">
                 <Clock className="w-4 h-4 text-violet-400" />
-                <span className="text-white text-sm font-medium">{data.duration}</span>
+                <span className="text-white text-sm font-medium">{duration}</span>
               </div>
               
-              {data.status === 'waiting' && (
+              {status === 'waiting' && (
                 <div className="mt-2">
                   <div className="w-full bg-white/10 rounded-full h-1">
                     <motion.div
                       className="h-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-full"
-                      initial={{ width: "0%" }}
-                      animate={{ width: "100%" }}
-                      transition={{ duration: 5, ease: "linear" }}
+                      style={{ width: `${progress}%` }}
+                      transition={{ duration: 0.5 }}
                     />
                   </div>
                   <div className="flex justify-between text-xs text-gray-400 mt-1">
                     <span>Waiting...</span>
-                    <span>2:30 remaining</span>
+                    <span>{remainingTime || 'Calculating...'} remaining</span>
                   </div>
                 </div>
               )}
@@ -137,7 +220,7 @@ export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
           </div>
 
           {/* Waiting Animation */}
-          {data.status === 'waiting' && (
+          {status === 'waiting' && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -162,6 +245,85 @@ export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
               </div>
             </motion.div>
           )}
+
+          {/* Completed State */}
+          {status === 'completed' && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mt-3 pt-3 border-t border-white/10"
+            >
+              <div className="flex items-center justify-center space-x-2 text-green-400">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-xs font-medium">Delay completed</span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Paused State */}
+          {status === 'paused' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-3 pt-3 border-t border-white/10"
+            >
+              <div className="flex items-center justify-center space-x-2 text-gray-400">
+                <Pause className="w-4 h-4" />
+                <span className="text-xs font-medium">Delay paused</span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Error State */}
+          {status === 'error' && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mt-3 pt-3 border-t border-white/10"
+            >
+              <div className="flex items-center justify-center space-x-2 text-red-400">
+                <Timer className="w-4 h-4" />
+                <span className="text-xs font-medium">Delay execution failed</span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ 
+              opacity: selected ? 1 : 0, 
+              height: selected ? 'auto' : 0 
+            }}
+            transition={{ duration: 0.2 }}
+            className="mt-3 pt-3 border-t border-white/10 overflow-hidden"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex space-x-2">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="w-6 h-6 rounded-full bg-violet-500/20 flex items-center justify-center hover:bg-violet-500/30 transition-colors"
+                  aria-label="Start delay"
+                >
+                  <Play className="w-3 h-3 text-violet-400" />
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center hover:bg-blue-500/30 transition-colors"
+                  aria-label="Settings"
+                >
+                  <Settings className="w-3 h-3 text-blue-400" />
+                </motion.button>
+              </div>
+              
+              <span className="text-xs text-gray-400">
+                Delay ID: {label.toLowerCase().replace(/\s+/g, '-')}
+              </span>
+            </div>
+          </motion.div>
         </div>
 
         {/* Glow Effect */}
@@ -189,3 +351,5 @@ export const DelayNode = memo<DelayNodeProps>(({ data, selected }) => {
     </motion.div>
   );
 });
+
+DelayNode.displayName = 'DelayNode';

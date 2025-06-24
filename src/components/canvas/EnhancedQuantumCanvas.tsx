@@ -20,8 +20,6 @@ import '@xyflow/react/dist/style.css';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { 
   Bot, 
-  Zap as ZapIcon, 
-  Zap, 
   Settings, 
   Play, 
   Pause, 
@@ -60,26 +58,28 @@ import {
   Coffee,
   Palette,
   Layout,
-  Zap as Lightning
+  Zap as Lightning,
+  Zap
 } from 'lucide-react';
-import { AgentNode } from './nodes/AgentNode';
-import { TriggerNode } from './nodes/TriggerNode';
-import { ActionNode } from './nodes/ActionNode';
-import { ConditionNode } from './nodes/ConditionNode';
-import { DelayNode } from './nodes/DelayNode';
+import type { NodeTypes } from '@xyflow/react';
+import { AgentNode as AgentNodeComponent } from './nodes/AgentNode';
+import { TriggerNode as TriggerNodeComponent } from './nodes/TriggerNode';
+import { ActionNode as ActionNodeComponent } from './nodes/ActionNode';
+import { ConditionNode as ConditionNodeComponent } from './nodes/ConditionNode';
+import { DelayNode as DelayNodeComponent } from './nodes/DelayNode';
 import { GlassCard } from '../ui/GlassCard';
 import { HolographicButton } from '../ui/HolographicButton';
 import { useCanvasStore } from '../../stores/canvasStore';
 import type { Blueprint } from '../../types';
 
 // Define node types with proper typing
-const nodeTypes = {
-  agent: AgentNode,
-  trigger: TriggerNode,
-  action: ActionNode,
-  condition: ConditionNode,
-  delay: DelayNode,
-} as const;
+const nodeTypes: NodeTypes = {
+  agent: AgentNodeComponent,
+  trigger: TriggerNodeComponent,
+  action: ActionNodeComponent,
+  condition: ConditionNodeComponent,
+  delay: DelayNodeComponent,
+};
 
 const proOptions = {
   hideAttribution: true,
@@ -436,9 +436,11 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           source: 'trigger-1',
           target: `agent-${index + 1}`,
           type: 'smoothstep' as const,
-          animated: true,
-          style: { stroke: '#10b981', strokeWidth: 3 } as const,
-          markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981' } as const,
+          animated: true, 
+          style: { stroke: '#10b981', strokeWidth: 3 },
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981' },
+          sourceHandle: null,
+          targetHandle: null
         });
       }
 
@@ -448,10 +450,12 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           id: `agent-${index}-agent-${index + 1}`,
           source: `agent-${index}`,
           target: `agent-${index + 1}`,
-          type: 'smoothstep' as const,
-          animated: true,
-          style: { stroke: '#8b5cf6', strokeWidth: 2 } as const,
-          markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' } as const,
+          type: 'smoothstep',
+          animated: true, 
+          style: { stroke: '#8b5cf6', strokeWidth: 2 },
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' },
+          sourceHandle: null,
+          targetHandle: null
         });
       }
     });
@@ -484,9 +488,11 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           source: `agent-${targetAgentIndex}`,
           target: `workflow-${index + 1}`,
           type: 'smoothstep' as const,
-          animated: true,
-          style: { stroke: '#f59e0b', strokeWidth: 2 } as const,
-          markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b' } as const,
+          animated: true, 
+          style: { stroke: '#f59e0b', strokeWidth: 2 },
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b' },
+          sourceHandle: null,
+          targetHandle: null
         });
       }
     });
@@ -584,12 +590,15 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
   const onConnect = useCallback(
     (params: Connection) => {
       const edge = {
-        ...params,
         id: `edge-${params.source}-${params.target}-${Date.now()}`,
+        source: params.source || '',
+        target: params.target || '',
+        sourceHandle: params.sourceHandle,
+        targetHandle: params.targetHandle,
         type: 'smoothstep',
-        animated: true, 
-        style: { stroke: '#8b5cf6', strokeWidth: 2 } as const,
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' } as const,
+        animated: true,
+        style: { stroke: '#8b5cf6', strokeWidth: 2 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' }
       };
       const newEdges = addEdge(edge, edges);
       setEdges([...newEdges]);
@@ -1027,7 +1036,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
-          onNodeClick={onNodeClick}
+          onNodeClick={onNodeClick as any}
           nodeTypes={nodeTypes}
           connectionMode={ConnectionMode.Loose}
           fitView
