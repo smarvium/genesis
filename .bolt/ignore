@@ -32,3 +32,10 @@ VSCODE_BACKEND_SETUP.md
 
 # Other generated files
 *.log
+*.tmp
+*.bak
+*.swp
+logs/
+temp/
+coverage/
+.env.local
