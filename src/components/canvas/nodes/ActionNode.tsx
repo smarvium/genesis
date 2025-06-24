@@ -104,7 +104,7 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected }) => {
   const handleMoreClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setShowMetrics(!showMetrics);
-  }, [showMetrics]);</parameter>
+  }, [showMetrics]);
 
   return (
     <motion.div
