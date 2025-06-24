@@ -6,7 +6,21 @@ import { GlassCard } from '../../ui/GlassCard';
 import type { ActionNodeData } from '../../../types/canvas';
 
 // Component with proper typing
-export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = false }) => {
+interface ActionNodeProps {
+  data: ActionNodeData;
+  selected?: boolean;
+  id: string;
+  dragging?: boolean;
+  type?: string;
+  xPos: number;
+  yPos: number;
+  zIndex: number;
+  isConnectable?: boolean;
+  sourcePosition?: Position;
+  targetPosition?: Position;
+}
+
+export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => {
   // Null check and proper typing for data
   if (!data) {
     return (
@@ -22,8 +36,10 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
   const [showMetrics, setShowMetrics] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  // Type assertion to ensure TypeScript knows the correct type
+  const nodeData = data as ActionNodeData;
+
   // Safe destructuring with proper typing and defaults
-  const typedData = data as ActionNodeData;
   const {
     label = 'Untitled Action',
     description = 'No description available',
@@ -34,7 +50,7 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
     metrics = null,
     config = {},
     icon: ActionIcon
-  } = typedData;
+  } = nodeData;
 
   // Reactive progress updates for executing status
   useEffect(() => {
@@ -58,7 +74,7 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
     };
   }, [status]);
 
-  const getStatusColor = useCallback((status: string) => {
+  const getStatusColor = useCallback((status: ActionNodeData['status']) => {
     switch (status) {
       case 'pending': return 'border-blue-400 shadow-blue-400/30';
       case 'executing': return 'border-yellow-400 shadow-yellow-400/30 animate-pulse';
@@ -68,12 +84,13 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
     }
   }, []);
 
-  const getActionIcon = useCallback((type: string) => {
+  const getActionIcon = useCallback((type: ActionNodeData['actionType']) => {
     switch (type) {
       case 'email': return Mail;
       case 'database': return Database;
       case 'webhook': return Globe;
       case 'api': return Settings;
+      case 'notification': return Mail; // Added notification case
       default: return Settings;
     }
   }, []);
@@ -128,10 +145,10 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
 
               <div className="flex-1">
                 <h3 className="text-white font-semibold text-sm leading-tight">
-                  {String(label)}
+                  {label}
                 </h3>
                 <p className="text-blue-300 text-xs capitalize">
-                  {String(actionType)} action
+                  {actionType} action
                 </p>
               </div>
             </div>
@@ -142,7 +159,7 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
                 {status === 'executing' && <Clock className="w-3 h-3 text-yellow-400 animate-spin" />}
                 {status === 'pending' && <div className="w-2 h-2 bg-blue-400 rounded-full" />}
                 {status === 'error' && <div className="w-2 h-2 bg-red-400 rounded-full" />}
-                <span className="text-xs text-white capitalize">{String(status)}</span>
+                <span className="text-xs text-white capitalize">{status}</span>
               </div>
               
               {/* Validation indicator */}
@@ -166,7 +183,7 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
 
           {/* Description */}
           <p className="text-gray-300 text-xs mb-3 leading-relaxed">
-            {String(description)}
+            {description}
           </p>
 
           {/* Action Details */}
@@ -177,6 +194,7 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
                 {actionType === 'email' ? 'SMTP Configured' :
                  actionType === 'database' ? 'Connection Ready' :
                  actionType === 'webhook' ? 'Endpoint Active' :
+                 actionType === 'notification' ? 'Service Ready' :
                  'API Connected'}
               </span>
             </div>
@@ -188,13 +206,13 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Recipients</span>
                     <span className="text-xs text-white">
-                      {String(config?.recipients || '3 contacts')}
+                      {config?.recipients || '3 contacts'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Template</span>
                     <span className="text-xs text-white">
-                      {String(config?.template || 'Weekly Report')}
+                      {config?.template || 'Weekly Report'}
                     </span>
                   </div>
                 </div>
@@ -205,13 +223,13 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Operation</span>
                     <span className="text-xs text-white">
-                      {String(config?.operation || 'INSERT')}
+                      {config?.operation || 'INSERT'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Table</span>
                     <span className="text-xs text-white">
-                      {String(config?.table || 'reports')}
+                      {config?.table || 'reports'}
                     </span>
                   </div>
                 </div>
@@ -222,13 +240,13 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Method</span>
                     <span className="text-xs text-white">
-                      {String(config?.method || 'POST')}
+                      {config?.method || 'POST'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Endpoint</span>
                     <span className="text-xs text-white">
-                      {String(config?.endpoint || 'api.example.com')}
+                      {config?.endpoint || 'api.example.com'}
                     </span>
                   </div>
                 </div>
@@ -239,13 +257,30 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Method</span>
                     <span className="text-xs text-white">
-                      {String(config?.method || 'GET')}
+                      {config?.method || 'GET'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">URL</span>
                     <span className="text-xs text-white">
-                      {String(config?.url || 'api.service.com')}
+                      {config?.url || 'api.service.com'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {actionType === 'notification' && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">Service</span>
+                    <span className="text-xs text-white">
+                      {config?.service || 'Slack'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">Channel</span>
+                    <span className="text-xs text-white">
+                      {config?.channel || '#general'}
                     </span>
                   </div>
                 </div>
@@ -270,7 +305,7 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
               </div>
               <div className="flex justify-between text-xs text-gray-400 mt-1">
                 <span>Executing...</span>
-                <span>{String(config?.progress || '60%')}</span>
+                <span>{config?.progress || '60%'}</span>
               </div>
             </motion.div>
           )}
@@ -299,7 +334,7 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
               <div className="flex items-center justify-center space-x-2 text-red-400">
                 <div className="w-2 h-2 bg-red-400 rounded-full" />
                 <span className="text-xs font-medium">
-                  {String(config?.errorMessage || 'Action failed')}
+                  {config?.errorMessage || 'Action failed'}
                 </span>
               </div>
             </motion.div>
@@ -320,12 +355,18 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="bg-white/5 rounded p-2">
                   <div className="text-gray-400">Executions</div>
-                  <div className="text-blue-400 font-medium">{String(metrics.executionCount)}</div>
+                  <div className="text-blue-400 font-medium">{metrics.executionCount}</div>
                 </div>
                 <div className="bg-white/5 rounded p-2">
                   <div className="text-gray-400">Avg Time</div>
-                  <div className="text-green-400 font-medium">{String(metrics.averageTime)}ms</div>
+                  <div className="text-green-400 font-medium">{metrics.averageTime}ms</div>
                 </div>
+                {metrics.lastRun && (
+                  <div className="col-span-2 bg-white/5 rounded p-2">
+                    <div className="text-gray-400">Last Run</div>
+                    <div className="text-white font-medium">{String(metrics.lastRun)}</div>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -341,7 +382,7 @@ export const ActionNode = memo<NodeProps<ActionNodeData>>(({ data, selected = fa
                 {validation.errors.map((error, index) => (
                   <div key={index} className="flex items-center text-xs text-yellow-300">
                     <AlertTriangle className="w-3 h-3 mr-1" />
-                    {String(error)}
+                    {error}
                   </div>
                 ))}
               </div>

@@ -15,18 +15,18 @@ import {
   ReactFlowProvider,
   useReactFlow,
   BackgroundVariant,
-  NodeTypes,
-  ComponentType
+  NodeTypes
 } from '@xyflow/react';
+import type { ComponentType } from 'react';
 import '@xyflow/react/dist/style.css';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
-import { 
-  Bot, 
-  Settings, 
-  Play, 
-  Pause, 
-  Save, 
-  Share2, 
+import {
+  Bot,
+  Settings,
+  Play,
+  Pause,
+  Save,
+  Share2,
   Layers,
   Sparkles,
   Eye,
@@ -72,11 +72,11 @@ import { GlassCard } from '../ui/GlassCard';
 import { HolographicButton } from '../ui/HolographicButton';
 import { useCanvasStore } from '../../stores/canvasStore';
 import type { Blueprint } from '../../types';
-import type { 
-  AgentNodeData, 
-  TriggerNodeData, 
-  ActionNodeData, 
-  ConditionNodeData, 
+import type {
+  AgentNodeData,
+  TriggerNodeData,
+  ActionNodeData,
+  ConditionNodeData,
   DelayNodeData,
   CanvasEdge,
   NodeData
@@ -107,7 +107,7 @@ interface EnhancedQuantumCanvasProps {
 // Enhanced Quantum Particle System
 const QuantumParticleSystem: React.FC<{ intensity: number; nodeCount: number }> = ({ intensity, nodeCount }) => {
   const particleCount = Math.min(100, 20 + nodeCount * 5);
-  
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {Array.from({ length: particleCount }).map((_, i) => (
@@ -116,9 +116,9 @@ const QuantumParticleSystem: React.FC<{ intensity: number; nodeCount: number }> 
           className="absolute w-1 h-1 rounded-full"
           style={{
             background: `linear-gradient(45deg, 
-              ${i % 4 === 0 ? '#8b5cf6' : 
-                i % 4 === 1 ? '#06b6d4' : 
-                i % 4 === 2 ? '#10b981' : '#f59e0b'}40, 
+              ${i % 4 === 0 ? '#8b5cf6' :
+                i % 4 === 1 ? '#06b6d4' :
+                  i % 4 === 2 ? '#10b981' : '#f59e0b'}40, 
               transparent)`
           }}
           initial={{
@@ -149,13 +149,13 @@ const QuantumParticleSystem: React.FC<{ intensity: number; nodeCount: number }> 
 const NeuralNetworkOverlay: React.FC<{ nodes: Node<NodeData>[] }> = ({ nodes }) => {
   return (
     <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
-      {nodes.map((node, i) => 
+      {nodes.map((node, i) =>
         nodes.slice(i + 1).map((otherNode, j) => {
           const distance = Math.sqrt(
-            Math.pow(node.position.x - otherNode.position.x, 2) + 
+            Math.pow(node.position.x - otherNode.position.x, 2) +
             Math.pow(node.position.y - otherNode.position.y, 2)
           );
-          
+
           if (distance < 400) {
             return (
               <motion.line
@@ -167,14 +167,14 @@ const NeuralNetworkOverlay: React.FC<{ nodes: Node<NodeData>[] }> = ({ nodes }) 
                 stroke="url(#neuralGradient)"
                 strokeWidth={Math.max(0.5, 3 - distance / 100)}
                 initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ 
-                  pathLength: 1, 
-                  opacity: [0, 0.6, 0] 
+                animate={{
+                  pathLength: 1,
+                  opacity: [0, 0.6, 0]
                 }}
                 transition={{
                   pathLength: { duration: 2 },
-                  opacity: { 
-                    duration: 4, 
+                  opacity: {
+                    duration: 4,
                     repeat: Infinity,
                     delay: Math.random() * 3
                   }
@@ -197,16 +197,16 @@ const NeuralNetworkOverlay: React.FC<{ nodes: Node<NodeData>[] }> = ({ nodes }) 
 };
 
 // Smart Node Suggestions
-const SmartSuggestions: React.FC<{ 
-  selectedNode: Node<NodeData> | null; 
+const SmartSuggestions: React.FC<{
+  selectedNode: Node<NodeData> | null;
   onAddNode: (type: string, position: { x: number; y: number }) => void;
 }> = ({ selectedNode, onAddNode }) => {
   const suggestions = useMemo(() => {
     if (!selectedNode) return [];
-    
+
     const nodeType = selectedNode.type;
     const suggestions = [];
-    
+
     if (nodeType === 'trigger') {
       suggestions.push(
         { type: 'agent', label: 'Add AI Agent', icon: Bot, reason: 'Process the trigger event' },
@@ -223,7 +223,7 @@ const SmartSuggestions: React.FC<{
         { type: 'delay', label: 'Add Delay', icon: Clock, reason: 'Wait before proceeding' }
       );
     }
-    
+
     return suggestions.slice(0, 3);
   }, [selectedNode]);
 
@@ -281,7 +281,7 @@ const CollaborationCursor: React.FC<{ user: { id: string; name: string; color: s
         animate={{ scale: [1, 1.2, 1] }}
         transition={{ duration: 2, repeat: Infinity }}
       />
-      <div 
+      <div
         className="absolute top-5 left-0 px-2 py-1 rounded text-xs text-white font-medium shadow-lg whitespace-nowrap"
         style={{ backgroundColor: user.color }}
       >
@@ -310,10 +310,10 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 
   // Enhanced Canvas state
-  const { 
-    canvasMode, 
-    setCanvasMode, 
-    selectedNodes, 
+  const {
+    canvasMode,
+    setCanvasMode,
+    selectedNodes,
     setSelectedNodes,
     isCollaborative,
     setIsCollaborative,
@@ -327,9 +327,9 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
   // Initialize canvas with blueprint data if provided
   useEffect(() => {
     if (initialNodes && initialNodes.length > 0 && initialEdges && initialEdges.length > 0) {
-      console.log('🎨 Using provided nodes and edges:', { 
-        nodes: initialNodes.length, 
-        edges: initialEdges.length 
+      console.log('🎨 Using provided nodes and edges:', {
+        nodes: initialNodes.length,
+        edges: initialEdges.length
       });
       setNodes(initialNodes);
       setEdges(initialEdges);
@@ -354,14 +354,14 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
             if (event.shiftKey) {
               const redoState = redo();
               if (redoState) {
-                setNodes([...redoState.nodes]);
-                setEdges([...redoState.edges]);
+                setNodes([...redoState.nodes] as Node<NodeData>[]);
+                setEdges([...redoState.edges] as CanvasEdge[]);
               }
             } else {
               const undoState = undo();
               if (undoState) {
-                setNodes([...undoState.nodes]);
-                setEdges([...undoState.edges]);
+                setNodes([...undoState.nodes] as Node<NodeData>[]);
+                setEdges([...undoState.edges] as CanvasEdge[]);
               }
             }
             event.preventDefault();
@@ -412,13 +412,13 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
       const radius = 300;
       const centerX = 500;
       const centerY = 300;
-      
+
       const agentNode: Node<AgentNodeData> = {
         id: `agent-${index + 1}`,
         type: 'agent',
-        position: { 
-          x: centerX + Math.cos(angle) * radius, 
-          y: centerY + Math.sin(angle) * radius 
+        position: {
+          x: centerX + Math.cos(angle) * radius,
+          y: centerY + Math.sin(angle) * radius
         },
         data: {
           label: agent.name,
@@ -440,7 +440,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           source: 'trigger-1',
           target: `agent-${index + 1}`,
           type: 'smoothstep',
-          animated: true, 
+          animated: true,
           style: { stroke: '#10b981', strokeWidth: 3 },
           markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981' },
           sourceHandle: null,
@@ -456,7 +456,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           source: `agent-${index}`,
           target: `agent-${index + 1}`,
           type: 'smoothstep',
-          animated: true, 
+          animated: true,
           style: { stroke: '#8b5cf6', strokeWidth: 2 },
           markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' },
           sourceHandle: null,
@@ -471,9 +471,9 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
       const workflowNode: Node<ActionNodeData> = {
         id: `workflow-${index + 1}`,
         type: 'action',
-        position: { 
-          x: 200 + (index * 400), 
-          y: 600 
+        position: {
+          x: 200 + (index * 400),
+          y: 600
         },
         data: {
           label: workflow.name,
@@ -494,7 +494,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           source: `agent-${targetAgentIndex}`,
           target: `workflow-${index + 1}`,
           type: 'smoothstep',
-          animated: true, 
+          animated: true,
           style: { stroke: '#f59e0b', strokeWidth: 2 },
           markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b' },
           sourceHandle: null,
@@ -518,11 +518,11 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
       'finance': 'Detail-oriented, compliance-focused, accuracy-driven',
       'operations': 'Efficient, process-oriented, optimization-focused',
     };
-    
-    const roleKey = Object.keys(personalities).find(key => 
+
+    const roleKey = Object.keys(personalities).find(key =>
       role.toLowerCase().includes(key)
     );
-    
+
     return personalities[roleKey || 'analyst'] || 'Professional, intelligent, and goal-oriented';
   };
 
@@ -545,7 +545,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
       'specialist': Target,
     };
 
-    const roleKey = Object.keys(roleIcons).find(key => 
+    const roleKey = Object.keys(roleIcons).find(key =>
       role.toLowerCase().includes(key)
     );
 
@@ -627,7 +627,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
   }, [nodes, edges, onSave, addToHistory]);
 
   const handleExecute = useCallback(() => {
-    if (onExecute) { 
+    if (onExecute) {
       onExecute();
       updateExecutionMetrics({
         totalNodes: nodes.length,
@@ -685,9 +685,9 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
         newNode = {
           id: `${type}-${Date.now()}`,
           type,
-          position: position || { 
-            x: Math.random() * 400 + 200, 
-            y: Math.random() * 400 + 200 
+          position: position || {
+            x: Math.random() * 400 + 200,
+            y: Math.random() * 400 + 200
           },
           data: {
             label: `New ${nodeTemplate.label}`,
@@ -704,9 +704,9 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
         newNode = {
           id: `${type}-${Date.now()}`,
           type,
-          position: position || { 
-            x: Math.random() * 400 + 200, 
-            y: Math.random() * 400 + 200 
+          position: position || {
+            x: Math.random() * 400 + 200,
+            y: Math.random() * 400 + 200
           },
           data: {
             label: `New ${nodeTemplate.label}`,
@@ -722,9 +722,9 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
         newNode = {
           id: `${type}-${Date.now()}`,
           type,
-          position: position || { 
-            x: Math.random() * 400 + 200, 
-            y: Math.random() * 400 + 200 
+          position: position || {
+            x: Math.random() * 400 + 200,
+            y: Math.random() * 400 + 200
           },
           data: {
             label: `New ${nodeTemplate.label}`,
@@ -740,9 +740,9 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
         newNode = {
           id: `${type}-${Date.now()}`,
           type,
-          position: position || { 
-            x: Math.random() * 400 + 200, 
-            y: Math.random() * 400 + 200 
+          position: position || {
+            x: Math.random() * 400 + 200,
+            y: Math.random() * 400 + 200
           },
           data: {
             label: `New ${nodeTemplate.label}`,
@@ -759,9 +759,9 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
         newNode = {
           id: `${type}-${Date.now()}`,
           type,
-          position: position || { 
-            x: Math.random() * 400 + 200, 
-            y: Math.random() * 400 + 200 
+          position: position || {
+            x: Math.random() * 400 + 200,
+            y: Math.random() * 400 + 200
           },
           data: {
             label: `New ${nodeTemplate.label}`,
@@ -787,12 +787,12 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
     // Implement dagre auto-layout algorithm
     const layoutedNodes = nodes.map((node, index) => ({
       ...node,
-      position: { 
+      position: {
         x: (index % 3) * 350 + 100,
         y: Math.floor(index / 3) * 200 + 100
       }
     }));
-    
+
     setNodes(layoutedNodes);
     addToHistory(layoutedNodes, edges);
   }, [nodes, edges, addToHistory]);
@@ -801,7 +801,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
     <div className="w-full h-full relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Enhanced Quantum Background */}
       <QuantumParticleSystem intensity={0.4} nodeCount={nodes.length} />
-      
+
       {/* Neural Network Overlay */}
       {isNeuralNetworkVisible && <NeuralNetworkOverlay nodes={nodes} />}
 
@@ -817,7 +817,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
             <div className="flex items-center space-x-6">
               {/* Logo & Info */}
               <div className="flex items-center space-x-3">
-                <motion.div 
+                <motion.div
                   className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center"
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   transition={{ type: "spring", stiffness: 400 }}
@@ -862,7 +862,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
                 >
                   <Grid className="w-4 h-4" />
                 </HolographicButton>
-                
+
                 <HolographicButton
                   variant="ghost"
                   size="sm"
@@ -871,7 +871,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
                 >
                   <Brain className="w-4 h-4" />
                 </HolographicButton>
-                
+
                 <HolographicButton
                   variant="ghost"
                   size="sm"
@@ -890,22 +890,22 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
                   onClick={() => {
                     const undoState = undo();
                     if (undoState) {
-                      setNodes(undoState.nodes);
-                      setEdges(undoState.edges);
+                      setNodes([...undoState.nodes] as Node<NodeData>[]);
+                      setEdges([...undoState.edges] as CanvasEdge[]);
                     }
                   }}
                 >
                   <RotateCcw className="w-4 h-4" />
                 </HolographicButton>
-                
+
                 <HolographicButton
                   variant="ghost"
                   size="sm"
                   onClick={() => {
                     const redoState = redo();
                     if (redoState) {
-                      setNodes(redoState.nodes);
-                      setEdges(redoState.edges);
+                      setNodes([...redoState.nodes] as Node<NodeData>[]);
+                      setEdges([...redoState.edges] as CanvasEdge[]);
                     }
                   }}
                 >
@@ -1037,7 +1037,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
                 >
                   <GlassCard variant="subtle" className="p-4 hover:bg-white/10 transition-all duration-200 group-hover:border-white/30">
                     <div className="flex items-center space-x-3">
-                      <motion.div 
+                      <motion.div
                         className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center relative overflow-hidden`}
                         whileHover={{ rotate: 5 }}
                       >
@@ -1063,7 +1063,7 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
 
             {/* Enhanced Blueprint Info */}
             {blueprint && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
@@ -1100,11 +1100,10 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
                     <div className="flex items-center space-x-2">
                       <div className="flex space-x-1">
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <div 
+                          <div
                             key={i}
-                            className={`w-1 h-1 rounded-full ${
-                              i < Math.min(5, Math.floor(nodes.length / 2)) ? 'bg-orange-400' : 'bg-gray-600'
-                            }`} 
+                            className={`w-1 h-1 rounded-full ${i < Math.min(5, Math.floor(nodes.length / 2)) ? 'bg-orange-400' : 'bg-gray-600'
+                              }`}
                           />
                         ))}
                       </div>
@@ -1136,15 +1135,15 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
           className="bg-transparent"
           onInit={setReactFlowInstance}
         >
-          <Background 
+          <Background
             variant={isGridVisible ? BackgroundVariant.Dots : undefined}
             gap={20}
             size={1}
             color="#ffffff"
             style={{ opacity: isGridVisible ? 0.1 : 0 }}
           />
-          
-          <Controls 
+
+          <Controls
             className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg"
             showZoom={true}
             showFitView={true}
@@ -1191,8 +1190,8 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
                       <motion.div
                         className="h-2 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full"
                         initial={{ width: "0%" }}
-                        animate={{ 
-                          width: `${(executionMetrics.completedNodes / executionMetrics.totalNodes) * 100}%` 
+                        animate={{
+                          width: `${(executionMetrics.completedNodes / executionMetrics.totalNodes) * 100}%`
                         }}
                         transition={{ duration: 0.5 }}
                       />
@@ -1263,8 +1262,8 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
 
       {/* Smart Suggestions */}
       <AnimatePresence>
-        <SmartSuggestions 
-          selectedNode={selectedNode} 
+        <SmartSuggestions
+          selectedNode={selectedNode}
           onAddNode={addSmartNode}
         />
       </AnimatePresence>

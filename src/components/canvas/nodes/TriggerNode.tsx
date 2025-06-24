@@ -1,12 +1,27 @@
 import React, { memo, useCallback, useState, useEffect } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Handle, Position } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Play, Calendar, Globe, Zap, MoreHorizontal, AlertCircle, AlertTriangle } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
 import type { TriggerNodeData } from '../../../types/canvas';
 
-export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = false }) => {
-  // Null check for data
+// Component with proper typing matching ActionNode pattern
+interface TriggerNodeProps {
+  data: TriggerNodeData;
+  selected?: boolean;
+  id: string;
+  dragging?: boolean;
+  type?: string;
+  xPos: number;
+  yPos: number;
+  zIndex: number;
+  isConnectable?: boolean;
+  sourcePosition?: Position;
+  targetPosition?: Position;
+}
+
+export const TriggerNode = memo<TriggerNodeProps>(({ data, selected = false }) => {
+  // Null check and proper typing for data
   if (!data) {
     return (
       <GlassCard variant="medium" className="w-72 border-2 border-red-400">
@@ -19,8 +34,12 @@ export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = 
   }
 
   const [isValidated, setIsValidated] = useState(false);
+  const [showConfig, setShowConfig] = useState(false);
 
-  // Ensure required fields exist with default values
+  // Type assertion to ensure TypeScript knows the correct type
+  const nodeData = data as TriggerNodeData;
+
+  // Safe destructuring with proper typing and defaults
   const {
     label = 'Untitled Trigger',
     description = 'No description available',
@@ -31,9 +50,9 @@ export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = 
     config = {},
     schedule,
     webhook
-  } = data;
+  } = nodeData;
 
-  const getStatusColor = useCallback((status: string) => {
+  const getStatusColor = useCallback((status: TriggerNodeData['status']) => {
     switch (status) {
       case 'ready': return 'border-emerald-400 shadow-emerald-400/30';
       case 'active': return 'border-green-400 shadow-green-400/30 animate-pulse';
@@ -43,7 +62,7 @@ export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = 
     }
   }, []);
 
-  const getTriggerIcon = useCallback((type: string) => {
+  const getTriggerIcon = useCallback((type: TriggerNodeData['triggerType']) => {
     switch (type) {
       case 'manual': return Play;
       case 'schedule': return Calendar;
@@ -55,8 +74,8 @@ export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = 
 
   const handleMoreClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    // Add your more actions logic here
-  }, []);
+    setShowConfig(!showConfig);
+  }, [showConfig]);
 
   const handleTriggerClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -110,14 +129,12 @@ export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = 
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 transition={{ type: "spring", stiffness: 400 }}
               >
-                {/* Conditional animated background */}
-                {selected && (
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-                  />
-                )}
+                {/* Animated background */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+                />
                 <IconComponent className="w-6 h-6 text-white relative z-10" />
               </motion.div>
 
@@ -165,35 +182,38 @@ export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = 
             {description}
           </p>
 
-          {/* Trigger Configuration */}
+          {/* Trigger Details */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-gray-400 text-xs font-medium">Configuration</span>
+              <span className="text-gray-400 text-xs font-medium">Trigger Details</span>
               <span className="text-emerald-400 text-xs">
-                {triggerType === 'schedule' ? (config?.schedule || 'Every Monday 9:00 AM') :
-                 triggerType === 'webhook' ? (config?.endpoint || 'POST /webhook/trigger') :
-                 triggerType === 'event' ? (config?.event || 'On data change') :
-                 'Manual activation'}
+                {triggerType === 'schedule' ? 'Schedule Active' :
+                 triggerType === 'webhook' ? 'Endpoint Ready' :
+                 triggerType === 'event' ? 'Event Listener' :
+                 'Manual Control'}
               </span>
             </div>
 
-            {/* Visual representation of trigger type */}
+            {/* Configuration Preview */}
             <div className="bg-white/5 rounded-lg p-3 border border-white/10">
               {triggerType === 'schedule' && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4 text-emerald-400" />
-                      <span className="text-white text-xs">Scheduled</span>
-                    </div>
-                    <div className="text-xs text-gray-300">
-                      {config?.nextRun || 'Next: Today 9:00 AM'}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Frequency</span>
                     <span className="text-xs text-white">
-                      {config?.frequency || 'Weekly'}
+                      {schedule?.frequency || 'Weekly'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">Next Run</span>
+                    <span className="text-xs text-white">
+                      {schedule?.nextRun || 'Today 9:00 AM'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">Timezone</span>
+                    <span className="text-xs text-white">
+                      {schedule?.timezone || 'UTC'}
                     </span>
                   </div>
                 </div>
@@ -202,18 +222,40 @@ export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = 
               {triggerType === 'webhook' && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Globe className="w-4 h-4 text-emerald-400" />
-                      <span className="text-white text-xs">Webhook</span>
-                    </div>
-                    <div className="text-xs text-gray-300">
-                      {config?.webhookStatus || 'API Ready'}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Method</span>
                     <span className="text-xs text-white">
-                      {config?.method || 'POST'}
+                      {webhook?.method || 'POST'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">URL</span>
+                    <span className="text-xs text-white">
+                      {webhook?.url || '/webhook/trigger'}
+                    </span>
+                  </div>
+                  {webhook?.headers && Object.keys(webhook.headers).length > 0 && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-400">Headers</span>
+                      <span className="text-xs text-white">
+                        {Object.keys(webhook.headers).length} configured
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {triggerType === 'event' && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">Event Type</span>
+                    <span className="text-xs text-white">
+                      {config?.eventType || 'Data Change'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">Source</span>
+                    <span className="text-xs text-white">
+                      {config?.source || 'Database'}
                     </span>
                   </div>
                 </div>
@@ -236,26 +278,6 @@ export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = 
                   </motion.button>
                 </div>
               )}
-
-              {triggerType === 'event' && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Zap className="w-4 h-4 text-emerald-400" />
-                      <span className="text-white text-xs">Event Listener</span>
-                    </div>
-                    <div className="text-xs text-gray-300">
-                      {config?.listenerStatus || 'Monitoring'}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">Event Type</span>
-                    <span className="text-xs text-white">
-                      {config?.eventType || 'Data Change'}
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
@@ -264,7 +286,7 @@ export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = 
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mt-3 pt-3 border-t border-white/10"
+              className="mt-3"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs text-gray-400">Activity</span>
@@ -274,7 +296,7 @@ export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = 
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ duration: 1, repeat: Infinity }}
                   />
-                  <span className="text-xs text-green-400">Listening</span>
+                  <span className="text-xs text-green-400">Active & Listening</span>
                 </div>
               </div>
             </motion.div>
@@ -309,6 +331,51 @@ export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = 
               </div>
             </motion.div>
           )}
+
+          {/* Configuration Panel */}
+          {showConfig && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-3 pt-3 border-t border-white/10"
+            >
+              <h5 className="text-sm font-medium text-white mb-2 flex items-center">
+                <Globe className="w-4 h-4 mr-2 text-emerald-400" />
+                Configuration Details
+              </h5>
+              <div className="space-y-2 text-xs">
+                <div className="bg-white/5 rounded p-2">
+                  <div className="text-gray-400">Type</div>
+                  <div className="text-emerald-400 font-medium capitalize">{triggerType}</div>
+                </div>
+                <div className="bg-white/5 rounded p-2">
+                  <div className="text-gray-400">Status</div>
+                  <div className="text-white font-medium capitalize">{status}</div>
+                </div>
+                {triggerType === 'schedule' && schedule?.nextRun && (
+                  <div className="bg-white/5 rounded p-2">
+                    <div className="text-gray-400">Next Execution</div>
+                    <div className="text-blue-400 font-medium">{schedule.nextRun}</div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Validation Errors */}
+          {!isValidated && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-3 pt-3 border-t border-yellow-500/20"
+            >
+              <div className="flex items-center text-xs text-yellow-300">
+                <AlertTriangle className="w-3 h-3 mr-1" />
+                Configuration required for {triggerType} trigger
+              </div>
+            </motion.div>
+          )}
         </div>
 
         {/* Glow Effect */}
@@ -334,17 +401,6 @@ export const TriggerNode = memo<NodeProps<TriggerNodeData>>(({ data, selected = 
         className="w-3 h-3 bg-emerald-400 border-2 border-white shadow-lg"
         style={{ zIndex: 10 }}
       />
-
-      {/* Configuration warning */}
-      {!isValidated && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-yellow-500/90 text-yellow-900 text-xs px-2 py-1 rounded whitespace-nowrap"
-        >
-          Configuration needed
-        </motion.div>
-      )}
     </motion.div>
   );
 });

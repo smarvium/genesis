@@ -1,17 +1,32 @@
 import React, { memo, useState, useEffect, useCallback } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Handle, Position } from '@xyflow/react';
 import { motion } from 'framer-motion';
-import { Clock, Timer, MoreHorizontal, Pause, CheckCircle, Settings, Play } from 'lucide-react';
+import { Clock, Timer, MoreHorizontal, Pause, CheckCircle, Settings, Play, AlertCircle } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
 import type { DelayNodeData } from '../../../types/canvas';
 
-export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = false }) => {
-  // Null check for data
+// Component with proper typing
+interface DelayNodeProps {
+  data: DelayNodeData;
+  selected?: boolean;
+  id: string;
+  dragging?: boolean;
+  type?: string;
+  xPos: number;
+  yPos: number;
+  zIndex: number;
+  isConnectable?: boolean;
+  sourcePosition?: Position;
+  targetPosition?: Position;
+}
+
+export const DelayNode = memo<DelayNodeProps>(({ data, selected = false }) => {
+  // Null check and proper typing for data
   if (!data) {
     return (
       <GlassCard variant="medium" className="w-64 border-2 border-red-400">
         <div className="p-4 text-center">
-          <Clock className="w-8 h-8 text-red-400 mx-auto mb-2" />
+          <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
           <p className="text-red-300">Invalid Delay Node</p>
         </div>
       </GlassCard>
@@ -21,7 +36,10 @@ export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = fals
   const [progress, setProgress] = useState(0);
   const [remainingTime, setRemainingTime] = useState('');
 
-  // Ensure required fields exist with defaults
+  // Type assertion to ensure TypeScript knows the correct type
+  const nodeData = data as DelayNodeData;
+
+  // Safe destructuring with proper typing and defaults
   const {
     label = 'Untitled Delay',
     description = 'No description available',
@@ -29,8 +47,8 @@ export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = fals
     duration = '5s',
     status = 'ready',
     color = 'from-violet-500 to-purple-600',
-    icon: IconComponent = Clock
-  } = data;
+    icon: DelayIcon
+  } = nodeData;
 
   // Calculate remaining time and progress when waiting
   useEffect(() => {
@@ -80,7 +98,7 @@ export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = fals
     };
   }, [status, duration]);
 
-  const getStatusColor = useCallback((status: string) => {
+  const getStatusColor = useCallback((status: DelayNodeData['status']) => {
     switch (status) {
       case 'ready': return 'border-violet-400 shadow-violet-400/30';
       case 'waiting': return 'border-yellow-400 shadow-yellow-400/30 animate-pulse';
@@ -91,7 +109,16 @@ export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = fals
     }
   }, []);
 
-  const getStatusIcon = useCallback((status: string) => {
+  const getDelayIcon = useCallback((type: DelayNodeData['delayType']) => {
+    switch (type) {
+      case 'fixed': return Clock;
+      case 'dynamic': return Timer;
+      case 'conditional': return Settings;
+      default: return Clock;
+    }
+  }, []);
+
+  const getStatusIcon = useCallback((status: DelayNodeData['status']) => {
     switch (status) {
       case 'waiting': return <Timer className="w-3 h-3 text-yellow-400" />;
       case 'paused': return <Pause className="w-3 h-3 text-gray-400" />;
@@ -107,6 +134,15 @@ export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = fals
     // Add your more actions logic here
   }, []);
 
+  const handleTriggerClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (status === 'ready') {
+      console.log(`Delay started: ${label}`);
+    }
+  }, [status, label]);
+
+  const IconComponent = DelayIcon || getDelayIcon(delayType);
+
   return (
     <motion.div
       initial={{ scale: 0.8, opacity: 0 }}
@@ -120,6 +156,7 @@ export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = fals
         type="target"
         position={Position.Left}
         className="w-3 h-3 bg-violet-400 border-2 border-white shadow-lg"
+        style={{ zIndex: 10 }}
       />
 
       {/* Main Node */}
@@ -136,14 +173,14 @@ export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = fals
               <motion.div 
                 className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center relative overflow-hidden`}
                 whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                transition={{ type: "spring", stiffness: 400 }}
               >
-                {/* Animated background - only animate when waiting */}
+                {/* Animated background */}
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"
                   animate={{ rotate: status === 'waiting' ? 360 : 0 }}
                   transition={{ 
-                    duration: 6, 
+                    duration: 7, 
                     repeat: status === 'waiting' ? Infinity : 0, 
                     ease: "linear" 
                   }}
@@ -155,8 +192,8 @@ export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = fals
                 <h3 className="text-white font-semibold text-sm leading-tight">
                   {label}
                 </h3>
-                <p className="text-violet-300 text-xs">
-                  {duration}
+                <p className="text-violet-300 text-xs capitalize">
+                  {delayType} delay
                 </p>
               </div>
             </div>
@@ -184,23 +221,27 @@ export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = fals
             {description}
           </p>
 
-          {/* Delay Configuration */}
+          {/* Delay Details */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-gray-400 text-xs font-medium">Delay Type</span>
-              <span className="text-violet-400 text-xs capitalize">
-                {delayType}
+              <span className="text-gray-400 text-xs font-medium">Delay Details</span>
+              <span className="text-violet-400 text-xs">
+                {delayType === 'fixed' ? 'Fixed Duration' :
+                 delayType === 'dynamic' ? 'Dynamic Duration' :
+                 delayType === 'conditional' ? 'Conditional Delay' :
+                 'Standard Delay'}
               </span>
             </div>
 
+            {/* Configuration Preview */}
             <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-              <div className="flex items-center justify-center space-x-2">
+              <div className="flex items-center justify-center space-x-2 mb-2">
                 <Clock className="w-4 h-4 text-violet-400" />
                 <span className="text-white text-sm font-medium">{duration}</span>
               </div>
               
               {status === 'waiting' && (
-                <div className="mt-2">
+                <div className="space-y-2">
                   <div className="w-full bg-white/10 rounded-full h-1">
                     <motion.div
                       className="h-1 bg-gradient-to-r from-violet-400 to-purple-400 rounded-full"
@@ -208,9 +249,35 @@ export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = fals
                       transition={{ duration: 0.5 }}
                     />
                   </div>
-                  <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <div className="flex justify-between text-xs text-gray-400">
                     <span>Waiting...</span>
                     <span>{remainingTime || 'Calculating...'} remaining</span>
+                  </div>
+                </div>
+              )}
+
+              {delayType === 'dynamic' && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">Min Duration</span>
+                    <span className="text-xs text-white">1s</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">Max Duration</span>
+                    <span className="text-xs text-white">30s</span>
+                  </div>
+                </div>
+              )}
+
+              {delayType === 'conditional' && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">Condition</span>
+                    <span className="text-xs text-white">When ready</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">Timeout</span>
+                    <span className="text-xs text-white">60s</span>
                   </div>
                 </div>
               )}
@@ -301,8 +368,10 @@ export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = fals
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
+                  onClick={handleTriggerClick}
                   className="w-6 h-6 rounded-full bg-violet-500/20 flex items-center justify-center hover:bg-violet-500/30 transition-colors"
                   aria-label="Start delay"
+                  disabled={status === 'waiting' || status === 'completed'}
                 >
                   <Play className="w-3 h-3 text-violet-400" />
                 </motion.button>
@@ -345,6 +414,7 @@ export const DelayNode = memo<NodeProps<DelayNodeData>>(({ data, selected = fals
         type="source"
         position={Position.Right}
         className="w-3 h-3 bg-violet-400 border-2 border-white shadow-lg"
+        style={{ zIndex: 10 }}
       />
     </motion.div>
   );

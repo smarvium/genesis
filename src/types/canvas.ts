@@ -1,11 +1,12 @@
 // Canvas-specific types for @xyflow/react compatibility
 import type { Node, Edge } from '@xyflow/react';
+import type { ComponentType } from 'react';
 
 // Base node data interface that satisfies Record<string, unknown> constraint
 export interface BaseNodeData extends Record<string, unknown> {
   label: string;
   description: string;
-  icon?: React.ComponentType<any>;
+  icon?: ComponentType<any>;
   color: string;
   status: string;
   metadata?: Record<string, any>;
@@ -47,12 +48,12 @@ export interface ActionNodeData extends BaseNodeData {
   validation?: {
     isValid: boolean;
     errors: string[];
-  };
+  } | null;
   metrics?: {
     executionCount: number;
     averageTime: number;
     lastRun?: string;
-  };
+  } | null;
 }
 
 export interface ConditionNodeData extends BaseNodeData {
@@ -78,3 +79,10 @@ export type NodeData = AgentNodeData | TriggerNodeData | ActionNodeData | Condit
 
 // Typed node definitions for @xyflow/react
 export type CanvasNode = Node<NodeData>;
+
+// Specific typed nodes for better type inference
+export type ActionCanvasNode = Node<ActionNodeData>;
+export type AgentCanvasNode = Node<AgentNodeData>;
+export type TriggerCanvasNode = Node<TriggerNodeData>;
+export type ConditionCanvasNode = Node<ConditionNodeData>;
+export type DelayCanvasNode = Node<DelayNodeData>;
