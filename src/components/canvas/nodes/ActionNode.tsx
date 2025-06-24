@@ -294,6 +294,8 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => 
                 </span>
               </div>
             </motion.div>
+          )}
+
           {/* Metrics Panel */}
           {metrics && showMetrics && (
             <motion.div
@@ -317,7 +319,6 @@ export const ActionNode = memo<ActionNodeProps>(({ data, selected = false }) => 
                 </div>
               </div>
             </motion.div>
-          )}
           )}
           {/* Validation Errors */}
           {validation && !validation.isValid && validation.errors.length > 0 && (
