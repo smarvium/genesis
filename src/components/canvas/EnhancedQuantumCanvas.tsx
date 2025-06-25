@@ -1309,7 +1309,6 @@ export const EnhancedQuantumCanvas: React.FC<EnhancedQuantumCanvasProps> = ({
             <CollaborationCursor key={user.id} user={user} />
           ))}
         </AnimatePresence>
-      </ReactFlowProvider>
     </div>
   );
 };
