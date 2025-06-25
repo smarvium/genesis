@@ -43,7 +43,6 @@ import { Node, Edge } from '@xyflow/react';
 import { Blueprint, SmartSuggestion } from '../../../types';
 import { useCanvas } from '../../../hooks/useCanvas';
 import { canvasService } from '../../../services/canvasService';
-import { Play, Settings, Mail, Database, Globe, Zap, Rocket, Workflow, Clock } from 'lucide-react';
 
 export const EnhancedCanvasStep: React.FC = () => {
   const { blueprint, setStep } = useWizardStore();
