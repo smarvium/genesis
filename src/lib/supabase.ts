@@ -102,10 +102,21 @@ const createSupabaseClient = () => {
 
 export const supabase = createSupabaseClient();
 
-// Get the current domain for redirects
+// Enhanced function to get the current domain for redirects
 const getCurrentDomain = () => {
   if (typeof window !== 'undefined') {
-    return window.location.origin;
+    // Get the full origin including protocol, hostname, and port
+    const origin = window.location.origin;
+    
+    // Check if we're running on a development server with a port
+    if (window.location.port) {
+      console.log(`🔗 Using redirect domain with port: ${origin}`);
+    }
+    
+    // Log the redirect URL for debugging
+    console.log(`🔗 Auth redirect URL: ${origin}/auth/callback`);
+    
+    return origin;
   }
   return 'http://localhost:5173'; // fallback for SSR
 };
@@ -303,11 +314,29 @@ export const auth = {
             access_type: 'offline',
             prompt: 'consent',
           }
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
       
       if (error) {
         console.error('❌ Google OAuth error:', error);
+        
+        // Handle specific Google OAuth errors
+        if (error.message?.includes('provider is not enabled')) {
+          return { error: { ...error, message: 'Google sign-in is not enabled. Please configure Google OAuth in your Supabase project.' } };
+        }
+        
+        if (error.message?.includes('invalid configuration')) {
+          return { error: { ...error, message: 'Google OAuth configuration is invalid. Please check your redirect URLs in both Google Cloud Console and Supabase.' } };
+        }
+        
+        if (error.message?.includes('redirect_uri_mismatch')) {
+          return { error: { ...error, message: 'Redirect URI mismatch. Please ensure the redirect URI in Google Cloud Console matches the one in Supabase.' } };
+        }
+        
         return { data: null, error };
       }
       
@@ -315,6 +344,28 @@ export const auth = {
       return { data, error };
     } catch (error: any) {
       console.error('❌ Google OAuth network error:', error);
+      
+      // Enhanced error handling for network issues
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        return { 
+          data: null, 
+          error: { 
+            message: 'Connection to Google failed. Please check your internet connection and try again.',
+            code: 'network_error'
+          }
+        };
+      }
+      
+      if (error.message?.includes('popup closed')) {
+        return { 
+          data: null, 
+          error: { 
+            message: 'Google sign-in was canceled. Please try again.',
+            code: 'popup_closed'
+          }
+        };
+      }
+      
       return { 
         data: null, 
         error: { 

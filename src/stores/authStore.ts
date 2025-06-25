@@ -143,6 +143,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signInWithGoogle: async () => {
     set({ loading: true, connectionError: false });
     const { data, error } = await auth.signInWithGoogle();
+
+    console.log('🔍 Google OAuth flow initiated:', {
+      hasData: !!data,
+      hasError: !!error,
+      errorMessage: error?.message || 'No error'
+    });
     
     if (error) {
       set({ loading: false });
@@ -155,6 +161,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (error.message?.includes('Network') || error.message?.includes('Failed to initiate')) {
         set({ connectionError: true });
         return { error: { ...error, message: 'Failed to connect to Google. Please check your internet and try again.' } };
+      }
+      
+      // Handle popup issues
+      if (error.message?.includes('popup') || error.code === 'popup_closed') {
+        return { error: { ...error, message: 'Google sign-in popup was closed. Please try again and complete the sign-in process.' } };
       }
       
       return { error };

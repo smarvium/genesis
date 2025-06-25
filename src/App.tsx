@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuthStore } from './stores/authStore';
 import { RevolutionaryLanding } from './components/landing/RevolutionaryLanding';
 import { AuthForm } from './components/auth/AuthForm';
@@ -7,6 +8,7 @@ import { Header } from './components/layout/Header';
 import { BackendStatus } from './components/ui/BackendStatus';
 import { QuantumLoader } from './components/ui/QuantumLoader';
 import { MagicalBackground } from './components/ui/MagicalBackground';
+import { getAuthErrorFromURL } from './lib/auth-utils';
 
 type AppState = 'landing' | 'auth' | 'app';
 
@@ -14,10 +16,19 @@ function App() {
   const { user, loading, initialize } = useAuthStore();
   const [appState, setAppState] = useState<AppState>('landing');
   const [guestMode, setGuestMode] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
     console.log('🚀 Phase 3: Initializing GenesisOS with Backend Integration...');
     initialize();
+    
+    // Check for auth errors in URL
+    const errorFromURL = getAuthErrorFromURL();
+    if (errorFromURL) {
+      setAuthError(errorFromURL);
+      setAppState('auth');
+    }
   }, []);
 
   useEffect(() => {
@@ -82,6 +93,7 @@ function App() {
     return (
       <>
         <AuthForm 
+          initialError={authError}
           onBack={() => setAppState('landing')}
         />
         <BackendStatus />
