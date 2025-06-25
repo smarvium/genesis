@@ -91,12 +91,13 @@ export const SimulationLab: React.FC<SimulationLabProps> = ({
   }, [guildId]);
 
   const connectToSimulationService = async () => {
+    console.log("Connecting to simulation service...");
     try {
       // In a real implementation, this would connect to a websocket server
       // For now, we'll simulate a connection with a timeout
       setTimeout(() => {
         setIsConnected(true);
-        console.log('🧪 Connected to simulation service');
+        console.log('Connected to simulation service');
         
         // Add an initial message
         addSystemMessage('Simulation service connected. Ready for voice or text interaction.');
@@ -139,6 +140,7 @@ export const SimulationLab: React.FC<SimulationLabProps> = ({
   };
 
   const handleSimulationUpdate = (event: MessageEvent) => {
+    console.log("Simulation update received");
     try {
       const message = JSON.parse(event.data);
       
@@ -218,9 +220,20 @@ export const SimulationLab: React.FC<SimulationLabProps> = ({
     simulateAgentResponse(message);
   };
 
+  const addSystemMessage = (message: string) => {
+    const newMessage = {
+      role: 'system',
+      content: message,
+      timestamp: new Date()
+    };
+    
+    setConversation(prev => [...prev, newMessage]);
+  };
+
   const simulateAgentResponse = async (userMessage: string) => {
     if (!currentAgent) return;
-    
+    console.log("Simulating agent response to:", userMessage);
+
     try {
       setIsSpeaking(true);
       

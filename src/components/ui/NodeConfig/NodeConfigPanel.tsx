@@ -1,5 +1,5 @@
 import React from 'react';
-import { createPortal } from 'react-dom';
+import ReactDOM from 'react-dom';
 import { motion } from 'framer-motion';
 import { AgentConfig } from './AgentConfig';
 import { TriggerConfig } from './TriggerConfig';
@@ -65,7 +65,7 @@ export const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
     }
   };
 
-  return createPortal(
+  return ReactDOM.createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
