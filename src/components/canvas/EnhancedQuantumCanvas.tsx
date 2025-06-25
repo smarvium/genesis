@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import {
   ReactFlow,
+  ReactFlowProvider,
   Node,
   Edge,
   Panel as ReactFlowPanel,
@@ -270,20 +271,21 @@ const SmartSuggestions: React.FC<{
 
 // Collaboration Cursors
 const CollaborationCursor: React.FC<{ user: { id: string; name: string; color: string; x: number; y: number } }> = ({ user }) => (
-  <motion.div
-    className="absolute pointer-events-none z-50"
-    style={{ left: user.x, top: user.y }}
-    initial={{ scale: 0 }}
-    animate={{ scale: 1 }}
-    exit={{ scale: 0 }}
-  >
-    <div className="relative">
+    <ReactFlowProvider>
       <motion.div
-        className="w-4 h-4 rounded-full border-2 border-white shadow-lg"
-        style={{ backgroundColor: user.color }}
-        animate={{ scale: [1, 1.2, 1] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        whileHover={{ scale: 1.02 }}
+        className={`relative ${selected ? 'z-10' : ''}`}
+      >
+        {/* Input Handle */}
+        <Handle
+          type="target"
+          position={Position.Left}
+          className="w-3 h-3 bg-violet-400 border-2 border-white shadow-lg"
+          style={{ zIndex: 10 }}
+        />
       <div
         className="absolute top-5 left-0 px-2 py-1 rounded text-xs text-white font-medium shadow-lg whitespace-nowrap"
         style={{ backgroundColor: user.color }}
