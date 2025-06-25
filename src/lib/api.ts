@@ -251,23 +251,6 @@ export const apiMethods = {
         return blueprint;
       }
     }
-      
-      // Generate contextual mock blueprint based on user input
-      const blueprint = {
-        ...mockData.blueprint,
-        id: `blueprint-${Date.now()}`,
-        user_input: userInput,
-        interpretation: `I understand you want to: ${userInput}. Let me create an intelligent system architecture to achieve this business goal using AI agents and automated workflows.`,
-        suggested_structure: {
-          ...mockData.blueprint.suggested_structure,
-          guild_name: generateGuildName(userInput),
-          guild_purpose: `Transform your business by automating: ${userInput}`
-        }
-      };
-      
-      console.log('✅ Phase 3: Enhanced mock blueprint generated:', blueprint.id);
-      return blueprint;
-    }
 
     try {
       console.log('🤖 Phase 3: Generating AI blueprint with Gemini Pro for:', userInput.substring(0, 50) + '...');
