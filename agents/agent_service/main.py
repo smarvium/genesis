@@ -36,11 +36,11 @@ class AgentConfig(BaseModel):
 # Define shutdown event handler
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup logic
-    logger.info("🤖 Starting GenesisOS Agent Service")
+    # Startup logic - use plain text for Windows compatibility
+    logger.info("Starting GenesisOS Agent Service")
     yield
     # Shutdown logic
-    logger.info("🤖 Shutting down GenesisOS Agent Service")
+    logger.info("Shutting down GenesisOS Agent Service")
 
 # Create FastAPI app
 app = FastAPI(lifespan=lifespan)
@@ -74,7 +74,7 @@ async def read_root():
 @app.post("/agent/{agent_id}/execute", response_model=AgentOutput)
 async def execute_agent(agent_id: str, agent_input: AgentInput):
     try:
-        logger.info(f"🤖 Agent {agent_id} executing with input: {agent_input.input[:50]}...")
+        logger.info(f"Agent {agent_id} executing with input: {agent_input.input[:50]}...")
         
         # Extract context
         context = agent_input.context
@@ -88,7 +88,7 @@ async def execute_agent(agent_id: str, agent_input: AgentInput):
         output, chain_of_thought = process_agent_request(agent_id, agent_input.input, context)
         
         # Log execution
-        logger.info(f"✅ Agent {agent_id} completed execution for {execution_id}")
+        logger.info(f"Agent {agent_id} completed execution for {execution_id}")
         
         return AgentOutput(
             output=output,
@@ -96,15 +96,15 @@ async def execute_agent(agent_id: str, agent_input: AgentInput):
             status="completed"
         )
     except Exception as e:
-        logger.error(f"❌ Error executing agent {agent_id}: {str(e)}")
-        logger.error(traceback.format_exc())
+        logger.error(f"Error executing agent {agent_id}: {str(e)}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Agent execution failed: {str(e)}")
 
 # Agent configuration endpoint
 @app.post("/agent/{agent_id}/configure")
 async def configure_agent(agent_id: str, config: AgentConfig):
     try:
-        logger.info(f"⚙️ Configuring agent {agent_id}: {config.name}")
+        logger.info(f"Configuring agent {agent_id}: {config.name}")
         
         # In a real implementation, this would update agent configuration in a database
         
@@ -114,7 +114,7 @@ async def configure_agent(agent_id: str, config: AgentConfig):
             "agent_id": agent_id
         }
     except Exception as e:
-        logger.error(f"❌ Error configuring agent {agent_id}: {str(e)}")
+        logger.error(f"Error configuring agent {agent_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Agent configuration failed: {str(e)}")
 
 # Process agent request with appropriate AI model
@@ -131,7 +131,7 @@ def process_agent_request(agent_id: str, input_text: str, context: Dict[str, Any
             return use_gemini_to_process(agent_id, input_text, context)
         except Exception as e:
             logger.error(f"❌ Gemini API call failed: {str(e)}")
-            logger.info("⚠️ Falling back to local mock response")
+            logger.info("Falling back to local mock response")
     
     # Fallback to mock responses
     return get_mock_response(agent_id, input_text, context)
