@@ -2,6 +2,7 @@ import os
 import sys
 import uvicorn
 from dotenv import load_dotenv
+import platform
 
 def run_agent_service():
     """Run the FastAPI agent service"""
@@ -11,7 +12,12 @@ def run_agent_service():
     # Get port from environment or use default
     port = int(os.getenv("AGENT_PORT", "8001"))
     
-    print(f"🚀 Starting GenesisOS Agent Service on port {port}...")
+    # Use plain text on Windows to avoid encoding issues
+    is_windows = platform.system() == "Windows"
+    rocket_emoji = "" if is_windows else "🚀 "
+    info_emoji = "" if is_windows else "ℹ️ "
+    
+    print(f"{rocket_emoji}Starting GenesisOS Agent Service on port {port}...")
     print("ℹ️  Press CTRL+C to stop the server")
     
     # Run the FastAPI server
