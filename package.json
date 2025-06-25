@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint src",
+    "preview": "vite preview",
+    "orchestrator:dev": "cd orchestrator && npm install && npm run dev",
+    "agent:dev": "cd agents/agent_service && python run.py",
+    "full-dev": "concurrently \"npm run dev\" \"npm run orchestrator:dev\" \"npm run agent:dev\""
     "preview": "vite preview",
     "backend": "cd backend && source venv/bin/activate && python run.py",
     "backend:windows": "cd backend && venv\\Scripts\\activate && python run.py",
@@ -45,6 +48,7 @@
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^8.2.2",
     "autoprefixer": "^10.4.18",
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
