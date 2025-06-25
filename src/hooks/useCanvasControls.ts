@@ -9,12 +9,18 @@ import { NodeData, CanvasEdge } from '../types/canvas';
 export function useCanvasControls() {
   const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const [isNodeConfigOpen, setIsNodeConfigOpen] = useState(false);
-  
-  const { getNode, getNodes, getEdges, setNodes, setEdges } = useReactFlow();
+
+  const reactFlowInstance = useReactFlow();
+  const { getNode } = reactFlowInstance || {}; 
   const { addToHistory, setSelectedNode: storeSetSelectedNode } = useCanvasStore();
   
   // Open the node configuration panel
   const openNodeConfig = useCallback((nodeId: string) => {
+    if (!getNode) {
+      console.error('React Flow not initialized. Cannot find node.');
+      return;
+    }
+    
     const node = getNode(nodeId);
     if (node) {
       const typedNode = node as Node<NodeData>;
@@ -29,13 +35,20 @@ export function useCanvasControls() {
     setIsNodeConfigOpen(false);
     setSelectedNode(null);
     storeSetSelectedNode(null);
-  }, []);
+  }, [storeSetSelectedNode]);
 
   // Update a node's data
   const updateNodeData = useCallback((
     nodeId: string, 
     newData: Partial<NodeData>
   ) => {
+    if (!reactFlowInstance) {
+      console.error('React Flow not initialized');
+      return null;
+    }
+    
+    const { getNodes, getEdges, setNodes } = reactFlowInstance;
+    
     const currentNodes = getNodes();
     const currentEdges = getEdges();
     
@@ -56,10 +69,17 @@ export function useCanvasControls() {
     addToHistory(updatedNodes as Node<NodeData>[], currentEdges as CanvasEdge[]);
     
     return updatedNodes.find(node => node.id === nodeId);
-  }, [addToHistory]);
+  }, [reactFlowInstance, addToHistory]);
 
   // Delete a node
   const deleteNode = useCallback((nodeId: string) => {
+    if (!reactFlowInstance) {
+      console.error('React Flow not initialized');
+      return;
+    }
+    
+    const { getNodes, getEdges, setNodes, setEdges } = reactFlowInstance;
+    
     const currentNodes = getNodes();
     const currentEdges = getEdges();
     
@@ -78,7 +98,7 @@ export function useCanvasControls() {
       closeNodeConfig();
     }
     storeSetSelectedNode(null);
-  }, [selectedNode, closeNodeConfig, addToHistory, storeSetSelectedNode, getNodes, getEdges, setNodes, setEdges]);
+  }, [selectedNode, closeNodeConfig, addToHistory, reactFlowInstance, storeSetSelectedNode]);
 
   return {
     selectedNode,

@@ -39,6 +39,7 @@ import { GlassCard } from '../../ui/GlassCard';
 import { HolographicButton } from '../../ui/HolographicButton';
 import { VoiceInterface } from '../../voice/VoiceInterface';
 import { SimulationLab } from '../../simulation/SimulationLab'; 
+import { ReactFlowProvider } from '@xyflow/react';
 import { Node, Edge } from '@xyflow/react';
 import { Blueprint, SmartSuggestion } from '../../../types';
 import { useCanvas } from '../../../hooks/useCanvas';
