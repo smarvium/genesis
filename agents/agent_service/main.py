@@ -46,12 +46,13 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # Configure CORS
+# Allowing all origins in development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development - restrict in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
 # Health check endpoint
@@ -59,6 +60,7 @@ app.add_middleware(
 async def read_root():
     gemini_key = os.getenv("GEMINI_API_KEY")
     elevenlabs_key = os.getenv("ELEVENLABS_API_KEY")
+    print(f"Health check requested. Gemini configured: {gemini_key and not gemini_key.startswith('your_')}")
     
     return {
         "status": "healthy",
@@ -73,6 +75,7 @@ async def read_root():
 # Execute agent endpoint
 @app.post("/agent/{agent_id}/execute", response_model=AgentOutput)
 async def execute_agent(agent_id: str, agent_input: AgentInput):
+    print(f"Received execute request for agent {agent_id}")
     try:
         logger.info(f"Agent {agent_id} executing with input: {agent_input.input[:50]}...")
         
@@ -107,6 +110,7 @@ async def configure_agent(agent_id: str, config: AgentConfig):
         logger.info(f"Configuring agent {agent_id}: {config.name}")
         
         # In a real implementation, this would update agent configuration in a database
+        print(f"Agent configuration updated for {agent_id} with name {config.name}")
         
         return {
             "success": True,

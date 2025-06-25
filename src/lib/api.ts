@@ -6,7 +6,7 @@ const hasRealBackend = import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE
 
 // Phase 3: Enhanced backend URL detection
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (isDevelopment ? 'http://localhost:8000' : 'https://genesisOS-backend-production.up.railway.app');
+  (isDevelopment ? 'http://localhost:3000' : 'https://genesisOS-backend-production.up.railway.app');
 
 console.log('🔧 Phase 3: Enhanced API Configuration:', {
   isDevelopment,
@@ -59,6 +59,11 @@ const getHttpUrl = (): string => {
 // Phase 3: Request interceptor with enhanced auth
 api.interceptors.request.use(
   (config) => {
+    // Make sure content-type is set for all requests
+    if (!config.headers['Content-Type'] && (config.method === 'POST' || config.method === 'PUT')) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+    
     const token = localStorage.getItem('supabase.auth.token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -211,14 +216,41 @@ export const apiMethods = {
   // Blueprint generation with AI integration
   generateBlueprint: async (userInput: string): Promise<any> => {
     if (!hasRealBackend && isDevelopment) {
-      console.log('🤖 Phase 3: Development mode - Simulating AI blueprint generation...');
+      console.log('🤖 Phase 3: Development mode - Trying orchestrator first before falling back...');
       
-      // Check if we should use a specific AI model
-      const preferredModel = localStorage.getItem('preferred_ai_model');
-      console.log('🧠 Using AI model:', preferredModel || 'default (Gemini Pro)');
-      
-      // Enhanced simulation delay for realistic AI processing time
-      await new Promise(resolve => setTimeout(resolve, 2500));
+      // Try to connect to the orchestrator even in dev mode
+      try {
+        console.log('Attempting to connect to orchestrator at', API_BASE_URL);
+        const response = await api.post('/wizard/generate-blueprint', { user_input: userInput });
+        console.log('✅ Successfully connected to orchestrator!');
+        return response.data;
+      } catch (error) {
+        console.log('⚠️ Orchestrator not available, using mock blueprint generator');
+        
+        // Check if we should use a specific AI model
+        const preferredModel = localStorage.getItem('preferred_ai_model');
+        console.log('🧠 Using AI model:', preferredModel || 'default (Gemini Pro)');
+        
+        // Enhanced simulation delay for realistic AI processing time
+        await new Promise(resolve => setTimeout(resolve, 2500));
+        
+        // Generate contextual mock blueprint based on user input
+        const blueprint = {
+          ...mockData.blueprint,
+          id: `blueprint-${Date.now()}`,
+          user_input: userInput,
+          interpretation: `I understand you want to: ${userInput}. Let me create an intelligent system architecture to achieve this business goal using AI agents and automated workflows.`,
+          suggested_structure: {
+            ...mockData.blueprint.suggested_structure,
+            guild_name: generateGuildName(userInput),
+            guild_purpose: `Transform your business by automating: ${userInput}`
+          }
+        };
+        
+        console.log('✅ Phase 3: Enhanced mock blueprint generated:', blueprint.id);
+        return blueprint;
+      }
+    }
       
       // Generate contextual mock blueprint based on user input
       const blueprint = {

@@ -4,6 +4,7 @@ import { useWizardStore } from '../../../stores/wizardStore';
 import { GuildDeploymentPanel } from '../../deployment/GuildDeploymentPanel';
 import { GlassCard } from '../../ui/GlassCard';
 import { HolographicButton } from '../../ui/HolographicButton';
+import { useState } from 'react';
 
 export const DeploymentStep: React.FC = () => {
   const { 
@@ -15,6 +16,8 @@ export const DeploymentStep: React.FC = () => {
     reset,
     errors 
   } = useWizardStore();
+
+  const [error, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
     // Only deploy if we have simulation results and haven't deployed yet
@@ -32,6 +35,7 @@ export const DeploymentStep: React.FC = () => {
   // Handle deployment error
   const handleDeploymentError = (errorMessage: string) => {
     console.error('❌ Guild deployment failed:', errorMessage);
+    setErrors([errorMessage]);
   };
 
   const handleGoToDashboard = () => {

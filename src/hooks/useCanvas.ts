@@ -30,7 +30,13 @@ export function useCanvas() {
   // Load nodes and edges from blueprint
   useEffect(() => {
     if (blueprint && nodes.length === 0 && edges.length === 0) {
-      loadCanvasFromBlueprint();
+      console.log("Loading canvas from blueprint");
+      try {
+        loadCanvasFromBlueprint();
+      } catch (error) {
+        console.error("Error loading canvas:", error);
+        setError("Failed to load canvas from blueprint");
+      }
     }
   }, [blueprint]);
   
@@ -49,6 +55,11 @@ export function useCanvas() {
     
     try {
       const { nodes: blueprintNodes, edges: blueprintEdges } = await canvasService.generateCanvasFromBlueprint(blueprint);
+      
+      console.log("Canvas generated successfully:", { 
+        nodes: blueprintNodes.length, 
+        edges: blueprintEdges.length 
+      });
       
       setNodes(blueprintNodes);
       setEdges(blueprintEdges);
@@ -101,6 +112,8 @@ export function useCanvas() {
   const executeWorkflow = useCallback(async () => {
     if (!nodes.length) return;
     
+    console.log("Executing workflow with", nodes.length, "nodes");
+    
     try {
       const result = await canvasService.executeWorkflow(
         'flow-1',
@@ -109,7 +122,7 @@ export function useCanvas() {
         { userId: 'user-123' }
       );
       
-      console.log('Workflow execution started:', result.executionId);
+      console.log('Workflow execution initiated:', result.executionId);
       return result;
     } catch (err) {
       console.error('Failed to execute workflow:', err);

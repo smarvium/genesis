@@ -38,11 +38,12 @@ import { EnhancedQuantumCanvas } from '../../canvas/EnhancedQuantumCanvas';
 import { GlassCard } from '../../ui/GlassCard';
 import { HolographicButton } from '../../ui/HolographicButton';
 import { VoiceInterface } from '../../voice/VoiceInterface';
-import { SimulationLab } from '../../simulation/SimulationLab';
+import { SimulationLab } from '../../simulation/SimulationLab'; 
 import { Node, Edge } from '@xyflow/react';
-import { Blueprint } from '../../../types';
+import { Blueprint, SmartSuggestion } from '../../../types';
 import { useCanvas } from '../../../hooks/useCanvas';
 import { canvasService } from '../../../services/canvasService';
+import { Play, Settings, Mail, Database, Globe, Zap, Rocket, Workflow, Clock } from 'lucide-react';
 
 export const EnhancedCanvasStep: React.FC = () => {
   const { blueprint, setStep } = useWizardStore();
@@ -63,7 +64,7 @@ export const EnhancedCanvasStep: React.FC = () => {
   } = useEnhancedCanvasStore();
 
   const [showTutorial, setShowTutorial] = useState(false);
-  const [activeFeature, setActiveFeature] = useState<string | null>(null);
+  const [activeFeature, setActiveFeature] = useState<string | null>(null); 
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [showSimulation, setShowSimulation] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
@@ -108,6 +109,226 @@ export const EnhancedCanvasStep: React.FC = () => {
         });
     }
   }, [blueprint, canvasInitialized]);
+  
+  // Function to generate canvas from blueprint
+  const generateCanvasFromBlueprint = useCallback((blueprint: Blueprint) => {
+    if (!blueprint) return;
+    
+    console.log('🎨 Generating canvas from blueprint in EnhancedCanvasStep');
+    const newNodes: Node[] = [];
+    const newEdges: Edge[] = [];
+    
+    // Create trigger node
+    newNodes.push({
+      id: 'trigger-1',
+      type: 'trigger',
+      position: { x: 50, y: 200 },
+      data: {
+        label: 'Guild Activation',
+        triggerType: 'manual',
+        description: `Initiates the ${blueprint.suggested_structure.guild_name} workflow`,
+        icon: Rocket,
+        color: 'from-emerald-500 to-teal-500',
+        status: 'ready'
+      },
+    });
+    
+    // Create agent nodes with smart layout algorithm
+    blueprint.suggested_structure.agents.forEach((agent, index) => {
+      const angle = (index * 2 * Math.PI) / blueprint.suggested_structure.agents.length;
+      const radius = 300;
+      const centerX = 500;
+      const centerY = 300;
+      
+      // Determine agent icon based on role
+      const getAgentIcon = (role: string) => {
+        const roleKeywords = {
+          'analyst': BarChart,
+          'support': MessageSquare,
+          'sales': DollarSign,
+          'marketing': Sparkles,
+          'finance': DollarSign,
+          'operations': Settings,
+          'hr': Users,
+          'customer': Heart,
+          'data': Database,
+          'content': FileText,
+          'social': Share2,
+          'email': Mail,
+          'report': FileText,
+          'intelligence': Brain,
+          'specialist': Target,
+        };
+
+        // Find matching role keyword
+        for (const keyword in roleKeywords) {
+          if (role.toLowerCase().includes(keyword)) {
+            return roleKeywords[keyword as keyof typeof roleKeywords];
+          }
+        }
+
+        return Bot;
+      };
+      
+      // Determine agent color
+      const getAgentColor = (index: number) => {
+        const colors = [
+          'from-purple-500 to-pink-500',
+          'from-blue-500 to-cyan-500',
+          'from-emerald-500 to-teal-500',
+          'from-orange-500 to-red-500',
+          'from-violet-500 to-purple-500',
+          'from-indigo-500 to-blue-500',
+        ];
+        return colors[index % colors.length];
+      };
+      
+      // Get agent personality based on role
+      const getAgentPersonality = (role: string) => {
+        const personalities = {
+          'analyst': 'Data-driven, analytical, precise with strategic insights',
+          'support': 'Empathetic, patient, solution-focused with customer care',
+          'sales': 'Persuasive, relationship-focused, results-oriented',
+          'marketing': 'Creative, brand-conscious, engagement-focused',
+          'finance': 'Detail-oriented, compliance-focused, accuracy-driven',
+          'operations': 'Efficient, process-oriented, optimization-focused',
+        };
+        
+        // Find matching personality
+        for (const keyword in personalities) {
+          if (role.toLowerCase().includes(keyword)) {
+            return personalities[keyword as keyof typeof personalities];
+          }
+        }
+        
+        return 'Professional, intelligent, and goal-oriented';
+      };
+      
+      const agentNode = {
+        id: `agent-${index + 1}`,
+        type: 'agent',
+        position: { 
+          x: centerX + Math.cos(angle) * radius, 
+          y: centerY + Math.sin(angle) * radius 
+        },
+        data: {
+          label: agent.name,
+          role: agent.role,
+          description: agent.description,
+          tools: agent.tools_needed,
+          personality: getAgentPersonality(agent.role),
+          icon: getAgentIcon(agent.role),
+          color: getAgentColor(index),
+          status: 'ready'
+        },
+      };
+      newNodes.push(agentNode);
+
+      // Create connections between agents and trigger
+      if (index === 0) {
+        newEdges.push({
+          id: `trigger-agent-${index + 1}`,
+          source: 'trigger-1',
+          target: `agent-${index + 1}`,
+          type: 'smoothstep',
+          animated: true,
+          style: { stroke: '#10b981', strokeWidth: 3 }
+        });
+      }
+
+      // Create connections between agents
+      if (index > 0) {
+        newEdges.push({
+          id: `agent-${index}-agent-${index + 1}`,
+          source: `agent-${index}`,
+          target: `agent-${index + 1}`,
+          type: 'smoothstep',
+          animated: true,
+          style: { stroke: '#8b5cf6', strokeWidth: 2 }
+        });
+      }
+    });
+
+    // Create workflow action nodes
+    const getWorkflowIcon = (triggerType: string) => {
+      const triggerIcons = {
+        'schedule': Clock,
+        'webhook': Globe,
+        'manual': Play,
+        'event': Zap,
+      };
+      return triggerIcons[triggerType as keyof typeof triggerIcons] || Workflow;
+    };
+
+    // Get workflow color
+    const getWorkflowColor = (triggerType: string) => {
+      const triggerColors = {
+        'schedule': 'from-blue-500 to-indigo-500',
+        'webhook': 'from-green-500 to-emerald-500',
+        'manual': 'from-purple-500 to-violet-500',
+        'event': 'from-yellow-500 to-orange-500',
+      };
+      return triggerColors[triggerType as keyof typeof triggerColors] || 'from-gray-500 to-slate-500';
+    };
+
+    // Map trigger type to action type
+    const mapTriggerTypeToActionType = (triggerType: string) => {
+      const mapping = {
+        'schedule': 'database',
+        'webhook': 'api',
+        'manual': 'notification',
+        'event': 'webhook',
+      };
+      return mapping[triggerType as keyof typeof mapping] || 'api';
+    };
+
+    blueprint.suggested_structure.workflows.forEach((workflow, index) => {
+      const workflowNode = {
+        id: `workflow-${index + 1}`,
+        type: 'action',
+        position: { 
+          x: 200 + (index * 400), 
+          y: 600 
+        },
+        data: {
+          label: workflow.name,
+          description: workflow.description,
+          actionType: mapTriggerTypeToActionType(workflow.trigger_type),
+          icon: getWorkflowIcon(workflow.trigger_type),
+          color: getWorkflowColor(workflow.trigger_type),
+          status: 'pending'
+        },
+      };
+      newNodes.push(workflowNode);
+
+      // Connect agents to workflows
+      if (blueprint.suggested_structure.agents.length > 0) {
+        const targetAgentIndex = Math.min(index + 1, blueprint.suggested_structure.agents.length);
+        newEdges.push({
+          id: `agent-${targetAgentIndex}-workflow-${index + 1}`,
+          source: `agent-${targetAgentIndex}`,
+          target: `workflow-${index + 1}`,
+          type: 'smoothstep',
+          animated: true,
+          style: { stroke: '#f59e0b', strokeWidth: 2 }
+        });
+      }
+    });
+
+    // Save to canvas store
+    console.log('🎨 Generated canvas:', { nodes: newNodes.length, edges: newEdges.length });
+    setWorkflowNodes(newNodes);
+    setWorkflowEdges(newEdges);
+    setCanvasInitialized(true);
+  }, [setWorkflowNodes, setWorkflowEdges]);
+  
+  // Initialize canvas when blueprint is loaded
+  useEffect(() => {
+    if (blueprint && !canvasInitialized) {
+      console.log("Initializing canvas from blueprint directly");
+      generateCanvasFromBlueprint(blueprint);
+    }
+  }, [blueprint, canvasInitialized, generateCanvasFromBlueprint]);
   
   const handleSaveCanvas = (nodes: any[], edges: any[]) => {
     console.log('💾 Enhanced Canvas saved:', { 

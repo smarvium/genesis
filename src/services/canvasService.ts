@@ -47,10 +47,19 @@ export const canvasService = {
   generateCanvasFromBlueprint: async (blueprint: Blueprint): Promise<{ nodes: Node<NodeData>[], edges: CanvasEdge[] }> => {
     console.log('🎨 Generating canvas from blueprint:', blueprint.id);
     
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+    
     try {
       // Try to use the orchestrator service if available
-      const response = await axios.post(`${API_BASE_URL}/generateCanvas`, { blueprint });
-      return response.data;
+      console.log('Attempting to generate canvas from blueprint via orchestrator:', API_BASE_URL);
+      try {
+        const response = await axios.post(`${API_BASE_URL}/generateCanvas`, { blueprint });
+        console.log('✅ Canvas generated successfully via orchestrator');
+        return response.data;
+      } catch (error) {
+        console.warn('⚠️ Orchestrator service unavailable:', error);
+        throw error;
+      }
     } catch (error) {
       console.warn('⚠️ Orchestrator service unavailable, falling back to client-side generation');
       // Fall back to client-side generation if orchestrator is unavailable
@@ -64,10 +73,13 @@ export const canvasService = {
   executeWorkflow: async (
     flowId: string, 
     nodes: Node<NodeData>[], 
-    edges: CanvasEdge[], 
+    edges: CanvasEdge[],
     context: Record<string, any> = {}
   ): Promise<{ executionId: string }> => {
     try {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+      console.log('Attempting to execute workflow via orchestrator:', API_BASE_URL);
+      
       const response = await axios.post(`${API_BASE_URL}/executeFlow`, {
         flowId,
         nodes,

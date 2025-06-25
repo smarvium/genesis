@@ -78,19 +78,28 @@ app.get('/', (req, res) => {
 // Blueprint to Canvas generation endpoint
 app.post('/generateCanvas', async (req, res) => {
   try {
-    const { blueprint } = req.body;
+    console.log('🎨 Canvas generation request received');
+    const blueprint = req.body.blueprint;
     
-    if (!blueprint || !blueprint.suggested_structure) {
+    // Validate blueprint
+    if (!blueprint) {
       return res.status(400).json({ 
-        error: 'Invalid blueprint data',
-        message: 'Blueprint data is required and must include suggested_structure'
+        error: 'Missing blueprint',
+        message: 'Blueprint data is required'
+      });
+    }
+    
+    if (!blueprint.suggested_structure) {
+      return res.status(400).json({ 
+        error: 'Invalid blueprint structure',
+        message: 'Blueprint must include suggested_structure'
       });
     }
 
     // Generate canvas nodes and edges
     const { nodes, edges } = generateCanvasFromBlueprint(blueprint);
     
-    console.log(`🎨 Generated canvas with ${nodes.length} nodes and ${edges.length} edges`);
+    console.log(`✅ Generated canvas with ${nodes.length} nodes and ${edges.length} edges`);
     
     return res.status(200).json({ 
       success: true,
@@ -110,6 +119,7 @@ app.post('/generateCanvas', async (req, res) => {
 // Execute workflow endpoint
 app.post('/executeFlow', async (req, res) => {
   try {
+    console.log('🔄 Workflow execution request received');
     const { flowId, nodes, edges, context = {} }: {
       flowId?: string;
       nodes: WorkflowNode[];
@@ -128,7 +138,7 @@ app.post('/executeFlow', async (req, res) => {
     const executionId = uuidv4();
     const executionContext = {
       id: executionId,
-      status: 'running',
+      status: 'initializing',
       startTime: new Date(),
       nodes: {},
       variables: context,
@@ -147,6 +157,7 @@ app.post('/executeFlow', async (req, res) => {
     }
 
     // Start async execution
+    console.log(`✅ Execution started: ${executionId} with ${nodes.length} nodes`);
     executeWorkflow(executionId, triggerNodes[0].id, nodes, edges, executionContext);
     
     // Return immediately with execution ID
@@ -167,6 +178,7 @@ app.post('/executeFlow', async (req, res) => {
 // Agent dispatch endpoint
 app.post('/agentDispatch', async (req, res) => {
   try {
+    console.log('🤖 Agent dispatch request received');
     const { agent_id, input, context = {} } = req.body;
     
     if (!agent_id || !input) {
@@ -176,13 +188,22 @@ app.post('/agentDispatch', async (req, res) => {
       });
     }
 
-    console.log(`🤖 Dispatching to agent ${agent_id} with input: ${input}`);
+    console.log(`Dispatching to agent ${agent_id} with input: ${input}`);
+    const AGENT_SERVICE_URL = process.env.AGENT_SERVICE_URL || 'http://localhost:8001';
     
     // Call agent service
-    const agentResponse = await axios.post(`${AGENT_SERVICE_URL}/agent/${agent_id}/execute`, {
+    console.log(`Calling agent service at ${AGENT_SERVICE_URL}/agent/${agent_id}/execute`);
+    const agentRequestPayload = {
       input,
       context
-    });
+    };
+    
+    const agentResponse = await axios.post(
+      `${AGENT_SERVICE_URL}/agent/${agent_id}/execute`, 
+      agentRequestPayload
+    );
+    
+    console.log('Agent response received');
     
     // Log agent response (if Supabase is configured)
     if (supabase) {

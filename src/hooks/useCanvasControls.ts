@@ -10,31 +10,32 @@ export function useCanvasControls() {
   const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const [isNodeConfigOpen, setIsNodeConfigOpen] = useState(false);
   
-  const { getNode } = useReactFlow();
-  const { addToHistory } = useCanvasStore();
+  const { getNode, getNodes, getEdges, setNodes, setEdges } = useReactFlow();
+  const { addToHistory, setSelectedNode: storeSetSelectedNode } = useCanvasStore();
   
   // Open the node configuration panel
   const openNodeConfig = useCallback((nodeId: string) => {
     const node = getNode(nodeId);
     if (node) {
-      setSelectedNode(node as Node<NodeData>);
+      const typedNode = node as Node<NodeData>;
+      setSelectedNode(typedNode);
+      storeSetSelectedNode(typedNode);
       setIsNodeConfigOpen(true);
     }
-  }, [getNode]);
+  }, [getNode, storeSetSelectedNode]);
 
   // Close the node configuration panel
   const closeNodeConfig = useCallback(() => {
     setIsNodeConfigOpen(false);
     setSelectedNode(null);
+    storeSetSelectedNode(null);
   }, []);
 
   // Update a node's data
   const updateNodeData = useCallback((
     nodeId: string, 
-    data: Partial<NodeData>
+    newData: Partial<NodeData>
   ) => {
-    const { getNodes, getEdges, setNodes } = useReactFlow();
-    
     const currentNodes = getNodes();
     const currentEdges = getEdges();
     
@@ -43,8 +44,8 @@ export function useCanvasControls() {
         return {
           ...node,
           data: {
-            ...node.data,
-            ...data
+            ...node.data as NodeData,
+            ...newData
           }
         };
       }
@@ -59,8 +60,6 @@ export function useCanvasControls() {
 
   // Delete a node
   const deleteNode = useCallback((nodeId: string) => {
-    const { getNodes, getEdges, setNodes, setEdges } = useReactFlow();
-    
     const currentNodes = getNodes();
     const currentEdges = getEdges();
     
@@ -78,7 +77,8 @@ export function useCanvasControls() {
     if (selectedNode?.id === nodeId) {
       closeNodeConfig();
     }
-  }, [selectedNode, closeNodeConfig, addToHistory]);
+    storeSetSelectedNode(null);
+  }, [selectedNode, closeNodeConfig, addToHistory, storeSetSelectedNode, getNodes, getEdges, setNodes, setEdges]);
 
   return {
     selectedNode,

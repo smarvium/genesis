@@ -171,12 +171,12 @@ export interface EnhancedWorkflowNode extends WorkflowNode {
 
 export interface SmartSuggestion {
   id: string;
-  type: string;
-  label: string;
-  description: string;
-  icon: React.ComponentType<any>;
-  confidence: number;
-  reasoning: string;
+  type?: string;
+  label?: string;
+  description?: string;
+  icon?: any;
+  confidence?: number;
+  reasoning?: string;
   position?: { x: number; y: number };
 }
 
@@ -252,7 +252,7 @@ export interface NodeTemplate {
   type: string;
   name: string;
   description: string;
-  icon: React.ComponentType<any>;
+  icon: any;
   color: string;
   category: 'Core' | 'Integration' | 'Logic' | 'Utility' | 'AI';
   defaultData: Record<string, any>;
